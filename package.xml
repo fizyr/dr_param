@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>dr_param</name>
+	<version>1.0.0</version>
+	<description>Alternative interface to parameter loading to support more complex structures.</description>
+	<license>Apache v2.0</license>
+	<author email="maarten@de-vri.es">Maarten de Vries</author>
+	<maintainer email="maarten@de-vri.es">Maarten de Vries</maintainer>
+
+	<buildtool_depend>catkin</buildtool_depend>
+	<depend>dr_base</depend>
+	<depend>roscpp</depend>
+</package>
