@@ -2,10 +2,17 @@
 
 #include "xmlrpc.hpp"
 
-#include <dr_log/dr_log.hpp>
-
 #include <ros/param.h>
 #include <ros/node_handle.h>
+
+#ifndef DR_PARAM_WARN
+#ifdef DR_WARN
+#define DR_PARAM_WARN DR_WARN
+#else
+#include <ros/console.h>
+#define DR_PARAM_WARN ROS_WARN_STREAM
+#endif
+#endif
 
 #include <stdexcept>
 
@@ -72,7 +79,7 @@ T getParam(
 ) {
 	XmlRpc::XmlRpcValue value;
 	if (!ros::param::get(key, value)) {
-		if (warn) DR_WARN("Failed to find ROS parameter: " << key << ". Using fallback value.");
+		if (warn) DR_PARAM_WARN("Failed to find ROS parameter: " << key << ". Using fallback value.");
 		return fallback;
 	}
 
