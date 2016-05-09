@@ -147,4 +147,15 @@ std::array<T, N> getParamArray(
 	return getParam<std::array<T, N>>(node, name, fallback, warn);
 }
 
+/// Get a map from the ROS parameter server.
+template<typename K, typename T>
+std::map<K, T> getParamMap(
+	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
+	std::string const & name,          ///< The parameter to retrieve.
+	std::map<K, T> const & fallback,   ///< The fallback value to return if the parameter is not found.
+	bool warn = true                   ///< If true, log a warning when the parameter was not found.
+) {
+	return getParam<std::map<K, T>>(node, name, fallback, warn);
+}
+
 }
