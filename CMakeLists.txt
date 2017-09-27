@@ -29,8 +29,9 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
 
 dr_add_gtest(xmlrpc test/xmlrpc.cpp)
-
 target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
+dr_add_gtest(yaml test/yaml.cpp)
+target_link_libraries(${PROJECT_NAME}_test_yaml ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
