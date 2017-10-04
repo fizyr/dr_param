@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1)
 project(dr_param)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(-Wall -Wextra -Wpedantic)
+
 find_package(catkin REQUIRED COMPONENTS
-	dr_base
 	dr_error
 	roscpp
 )
@@ -15,8 +19,8 @@ catkin_package(
 	DEPENDS YAML_CPP
 )
 
-dr_include_directories(
-	include/${PROJECT_NAME}
+include_directories(include/${PROJECT_NAME})
+include_directories(SYSTEM
 	${catkin_INCLUDE_DIRS}
 	${YAML_CPP_INCLUDE_DIRS}
 )
@@ -28,9 +32,9 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
 
-dr_add_gtest(xmlrpc test/xmlrpc.cpp)
+catkin_add_gtest(${PROJECT_NAME}_test_xmlrpc test/xmlrpc.cpp)
 target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
-dr_add_gtest(yaml test/yaml.cpp)
+catkin_add_gtest(${PROJECT_NAME}_test_yaml test/yaml.cpp)
 target_link_libraries(${PROJECT_NAME}_test_yaml ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
