@@ -8,7 +8,6 @@
 	<maintainer email="maarten@de-vri.es">Maarten de Vries</maintainer>
 
 	<buildtool_depend>catkin</buildtool_depend>
-	<depend>dr_base</depend>
 	<depend>dr_error</depend>
 	<depend>roscpp</depend>
 	<depend>yaml-cpp</depend>
