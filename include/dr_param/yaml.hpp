@@ -8,6 +8,12 @@
 
 namespace dr {
 
+DetailedError expectMap(YAML::Node const & node);
+DetailedError expectMap(YAML::Node const & node, std::size_t size);
+DetailedError expectSequence(YAML::Node const & node);
+DetailedError expectSequence(YAML::Node const & node, std::size_t size);
+DetailedError expectScalar(YAML::Node const & node);
+
 template<typename T>
 void setIfExists(T & output, YAML::Node const & node, std::string const & key) {
 	if (node[key]) output = node[key].as<T>();

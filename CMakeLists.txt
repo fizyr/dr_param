@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(yaml-cpp REQUIRED)
+find_package(fmt REQUIRED)
 
 catkin_package(
 	INCLUDE_DIRS include
@@ -31,7 +32,7 @@ add_library(${PROJECT_NAME}
 	src/yaml.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} fmt::fmt-header-only)
 
 catkin_add_gtest(${PROJECT_NAME}_test_xmlrpc test/xmlrpc.cpp)
 target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
