@@ -1,11 +1,17 @@
 #include "yaml.hpp"
 
+#include <dr_util/expand.hpp>
+
 #include <fmt/format.h>
+
+#include <boost/filesystem.hpp>
 
 #include <cerrno>
 #include <fstream>
 
 namespace dr {
+
+using namespace std::string_literals;
 
 DetailedError expectMap(YAML::Node const & node) {
 	if (!node) return DetailedError{std::errc::invalid_argument, fmt::format("no such node")};

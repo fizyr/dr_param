@@ -8,6 +8,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 find_package(catkin REQUIRED COMPONENTS
 	dr_error
+	dr_util
 	roscpp
 )
 
@@ -30,6 +31,7 @@ include_directories(SYSTEM
 add_library(${PROJECT_NAME}
 	src/xmlrpc.cpp
 	src/yaml.cpp
+	src/yaml_preprocess.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} fmt::fmt-header-only)
