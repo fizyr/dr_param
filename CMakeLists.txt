@@ -17,6 +17,7 @@ catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES ${PROJECT_NAME}
 	DEPENDS YAML_CPP
+	CATKIN_DEPENDS dr_error
 )
 
 include_directories(include/${PROJECT_NAME})
