@@ -36,10 +36,14 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} fmt::fmt-header-only)
 
+add_definitions("-DTEST_DATA=${CMAKE_CURRENT_SOURCE_DIR}/test/data")
+
 catkin_add_gtest(${PROJECT_NAME}_test_xmlrpc test/xmlrpc.cpp)
 target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
 catkin_add_gtest(${PROJECT_NAME}_test_yaml test/yaml.cpp)
 target_link_libraries(${PROJECT_NAME}_test_yaml ${PROJECT_NAME})
+catkin_add_gtest(${PROJECT_NAME}_test_yaml_preprocess test/yaml_preprocess.cpp)
+target_link_libraries(${PROJECT_NAME}_test_yaml_preprocess ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
