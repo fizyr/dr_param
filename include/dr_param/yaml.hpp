@@ -2,9 +2,13 @@
 #include <dr_error/error_or.hpp>
 
 #include <yaml-cpp/yaml.h>
+#include <estd/convert/convert.hpp>
 
+#include <algorithm>
 #include <array>
+#include <locale>
 #include <stdexcept>
+#include <string>
 
 namespace dr {
 
@@ -52,4 +56,83 @@ namespace YAML {
 			return true;
 		}
 	};
+}
+
+namespace estd {
+
+// conversions for primitives
+dr::ErrorOr<std::string> convert(YAML::Node const & node, Parse<std::string, dr::DetailedError>);
+dr::ErrorOr<bool>        convert(YAML::Node const & node, Parse<bool,        dr::DetailedError>);
+
+dr::ErrorOr<short>     convert(YAML::Node const & node, Parse<short,     dr::DetailedError>);
+dr::ErrorOr<int>       convert(YAML::Node const & node, Parse<int,       dr::DetailedError>);
+dr::ErrorOr<long>      convert(YAML::Node const & node, Parse<long,      dr::DetailedError>);
+dr::ErrorOr<long long> convert(YAML::Node const & node, Parse<long long, dr::DetailedError>);
+
+dr::ErrorOr<unsigned short>     convert(YAML::Node const & node, Parse<unsigned short,     dr::DetailedError>);
+dr::ErrorOr<unsigned int>       convert(YAML::Node const & node, Parse<unsigned int,       dr::DetailedError>);
+dr::ErrorOr<unsigned long>      convert(YAML::Node const & node, Parse<unsigned long,      dr::DetailedError>);
+dr::ErrorOr<unsigned long long> convert(YAML::Node const & node, Parse<unsigned long long, dr::DetailedError>);
+
+dr::ErrorOr<float>       convert(YAML::Node const & node, Parse<float,       dr::DetailedError>);
+dr::ErrorOr<double>      convert(YAML::Node const & node, Parse<double,      dr::DetailedError>);
+dr::ErrorOr<long double> convert(YAML::Node const & node, Parse<long double, dr::DetailedError>);
+
+// conversion for std::array
+template<typename T, std::size_t N, typename E>
+std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::array<T, N>>>
+convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
+	if (auto error = dr::expectSequence(node, N)) return error;
+
+	std::array<T, N> result;
+
+	int index = 0;
+	for (YAML::iterator i = node.begin(); i != node.end(); ++i) {
+		if (index >= N) return dr::DetailedError{std::errc::invalid_argument, "sequence too long, expected " + std::to_string(N) + ", now at index " + std::to_string(index)};
+		dr::ErrorOr<T> element = parse<T, dr::DetailedError>(*i);
+		if (!element) return element.error_unchecked().prefixed("at child node " + std::to_string(index) + ": ");
+		result[index++] = std::move(*element);
+	}
+
+	return result;
+}
+
+// conversion for std::vector
+template<typename T, typename E>
+std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::vector<T>>>
+convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
+	if (auto error = dr::expectSequence(node)) return error;
+
+	std::vector<T> result;
+	result.reserve(node.size());
+
+	int index = 0;
+	for (YAML::iterator i = node.begin(); i != node.end(); ++i) {
+		dr::ErrorOr<T> element = parse<T, dr::DetailedError>(*i);
+		if (!element) return element.error_unchecked().prefixed("at child node " + std::to_string(index) + ": ");
+		result.push_back(std::move(*element));
+		++index;
+	}
+
+	return result;
+}
+
+// conversion for std::map<std::string, T>
+template<typename T>
+std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::map<std::string, T>>>
+convert(YAML::Node const & node, Parse<std::map<std::string, T>, dr::ErrorOr<std::map<std::string, T>>>) {
+	if (auto error = dr::expectMap(node)) return error;
+
+	std::map<std::string, T> result;
+
+	for (YAML::iterator i = node.begin(); i != node.end(); ++i) {
+		std::string const & name = i->first.Scalar();
+		dr::ErrorOr<T> element = parse<T, dr::DetailedError>(i->second);
+		if (!element) return element.error_unchecked().prefixed("at child node '" + name + "': ");
+		result.insert(i->first.Scalar(), std::move(*element));
+	}
+
+	return result;
+}
+
 }
