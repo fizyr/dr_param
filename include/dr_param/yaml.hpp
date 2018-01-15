@@ -79,8 +79,8 @@ dr::ErrorOr<double>      convert(YAML::Node const & node, Parse<double,      dr:
 dr::ErrorOr<long double> convert(YAML::Node const & node, Parse<long double, dr::DetailedError>);
 
 // conversion for std::array
-template<typename T, std::size_t N, typename E>
-std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::array<T, N>>>
+template<typename T, std::size_t N>
+std::enable_if_t<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::array<T, N>>>
 convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
 	if (auto error = dr::expectSequence(node, N)) return error;
 
@@ -98,8 +98,8 @@ convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
 }
 
 // conversion for std::vector
-template<typename T, typename E>
-std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::vector<T>>>
+template<typename T>
+std::enable_if_t<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::vector<T>>>
 convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
 	if (auto error = dr::expectSequence(node)) return error;
 
@@ -107,7 +107,7 @@ convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
 	result.reserve(node.size());
 
 	int index = 0;
-	for (YAML::iterator i = node.begin(); i != node.end(); ++i) {
+	for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
 		dr::ErrorOr<T> element = parse<T, dr::DetailedError>(*i);
 		if (!element) return element.error_unchecked().prefixed("at child node " + std::to_string(index) + ": ");
 		result.push_back(std::move(*element));
@@ -119,13 +119,13 @@ convert(YAML::Node const & node, Parse<std::vector<T>, dr::DetailedError>) {
 
 // conversion for std::map<std::string, T>
 template<typename T>
-std::enable_if<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::map<std::string, T>>>
+std::enable_if_t<can_parse_v<YAML::Node, T, dr::DetailedError>, dr::ErrorOr<std::map<std::string, T>>>
 convert(YAML::Node const & node, Parse<std::map<std::string, T>, dr::ErrorOr<std::map<std::string, T>>>) {
 	if (auto error = dr::expectMap(node)) return error;
 
 	std::map<std::string, T> result;
 
-	for (YAML::iterator i = node.begin(); i != node.end(); ++i) {
+	for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
 		std::string const & name = i->first.Scalar();
 		dr::ErrorOr<T> element = parse<T, dr::DetailedError>(i->second);
 		if (!element) return element.error_unchecked().prefixed("at child node '" + name + "': ");
