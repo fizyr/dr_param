@@ -98,7 +98,7 @@ ErrorOr<YAML::Node> readYamlFile(std::string const & path) {
 	std::ifstream file(path);
 	if (!file.good()) {
 		int error = errno;
-		return DetailedError{{error, std::generic_category()}, "failed to open " + path + ": " + std::strerror(error)};
+		return DetailedError{{error, std::generic_category()}, path};
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
