@@ -50,6 +50,7 @@ std::string YamlError::formatTrace() const {
 }
 
 std::string YamlError::format() const {
+	if (trace.empty()) return message;
 	return formatTrace() + ": " + message;
 }
 
