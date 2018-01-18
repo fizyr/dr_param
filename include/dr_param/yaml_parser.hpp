@@ -68,12 +68,14 @@ result<T, YamlError> parseYamlStruct(YAML::Node const & node, std::vector<ChildD
 	std::vector<bool> parsed(children.size(), false);
 
 	for (auto child : node) {
-		std::string const & key = child.first.Scalar();
+		std::string const & key  = child.first.Scalar();
+		YAML::Node const & value = child.second;
+
 		auto result = detail::parseYamlStructFindDescription(key, children);
 		if (!result) return YamlError{"unknown property `" + key + "'"};
 
 		auto & [index, description] = *result;
-		if (auto error = description.parse(child, output)) return error->appendTrace({description.key, description.type_name, child.Type()});
+		if (auto error = description.parse(value, output)) return error->appendTrace({description.key, description.type_name, value.Type()});
 		parsed[index] = true;
 	}
 
@@ -92,12 +94,14 @@ result<std::unique_ptr<T>, YamlError> parseYamlStructPtr(YAML::Node const & node
 	std::vector<bool> parsed(children.size(), false);
 
 	for (auto child : node) {
-		std::string const & key = child.first.Scalar();
+		std::string const & key  = child.first.Scalar();
+		YAML::Node const & value = child.second;
+
 		auto result = detail::parseYamlStructFindDescription(key, children);
 		if (!result) return YamlError{"unknown property `" + key + "'"};
 
 		auto & [index, description] = *result;
-		if (auto error = description.parse(child, *output)) return error->appendTrace({description.key, description.type_name, child.Type()});
+		if (auto error = description.parse(value, *output)) return error->appendTrace({description.key, description.type_name, value.Type()});
 		parsed[index] = true;
 	}
 
