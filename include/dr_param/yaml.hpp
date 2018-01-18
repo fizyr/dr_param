@@ -153,6 +153,7 @@ convert(YAML::Node const & node, ParseYaml<std::array<T, N>>) {
 template<typename T>
 std::enable_if_t<can_parse_yaml<T>, YamlResult<std::vector<T>>>
 convert(YAML::Node const & node, ParseYaml<std::vector<T>>) {
+	if (node.IsNull()) return std::vector<T>{};
 	if (!node.IsSequence()) return YamlError{"unexpected node type, expected sequence, got " + toString(node.Type())};
 
 	std::vector<T> result;
