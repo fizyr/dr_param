@@ -35,6 +35,12 @@ public:
 	std::string type_name;
 	bool required;
 	Parser parse;
+
+	/// Allow implicit conversion to ChildDescription<D> for D derived from T.
+	template<typename D, typename = std::enable_if_t<std::is_base_of_v<T, D>>>
+	operator ChildDescription<D>() const {
+		return {key, type_name, required, parse};
+	}
 };
 
 template<typename Parent, typename Child>
