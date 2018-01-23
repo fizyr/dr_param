@@ -86,7 +86,7 @@ result<T, YamlError> parseYamlStruct(YAML::Node const & node, std::vector<ChildD
 	}
 
 	for (std::size_t i = 0; i < children.size(); ++i) {
-		if (!parsed[i]) return YamlError{"missing property `" + children[i].key + "'"};
+		if (!parsed[i] && children[i].required) return YamlError{"missing property `" + children[i].key + "'"};
 	}
 
 	return {in_place_valid, std::move(output)};
@@ -112,7 +112,7 @@ result<std::unique_ptr<T>, YamlError> parseYamlStructPtr(YAML::Node const & node
 	}
 
 	for (std::size_t i = 0; i < children.size(); ++i) {
-		if (!parsed[i]) return YamlError{"missing property `" + children[i].key + "'"};
+		if (!parsed[i] && children[i].required) return YamlError{"missing property `" + children[i].key + "'"};
 	}
 
 	return {in_place_valid, std::move(output)};
