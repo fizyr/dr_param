@@ -172,7 +172,7 @@ namespace {
 
 		std::string const & raw = node.Scalar();
 		std::size_t parsed = 0;
-		unsigned long long value = 0;
+		long double value = 0;
 		try {
 			value = std::stold(raw, &parsed);
 		} catch (std::invalid_argument &e) {
