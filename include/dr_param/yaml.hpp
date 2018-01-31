@@ -115,11 +115,13 @@ namespace dr {
 YamlResult<std::string> convert(YAML::Node const & node, ParseYaml<std::string>);
 YamlResult<bool>        convert(YAML::Node const & node, ParseYaml<bool>);
 
+YamlResult<char>      convert(YAML::Node const & node, ParseYaml<char>);
 YamlResult<short>     convert(YAML::Node const & node, ParseYaml<short>);
 YamlResult<int>       convert(YAML::Node const & node, ParseYaml<int>);
 YamlResult<long>      convert(YAML::Node const & node, ParseYaml<long>);
 YamlResult<long long> convert(YAML::Node const & node, ParseYaml<long long>);
 
+YamlResult<unsigned char>      convert(YAML::Node const & node, ParseYaml<unsigned char>);
 YamlResult<unsigned short>     convert(YAML::Node const & node, ParseYaml<unsigned short>);
 YamlResult<unsigned int>       convert(YAML::Node const & node, ParseYaml<unsigned int>);
 YamlResult<unsigned long>      convert(YAML::Node const & node, ParseYaml<unsigned long>);

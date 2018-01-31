@@ -186,11 +186,13 @@ namespace {
 	}
 }
 
+YamlResult<char>      convert(YAML::Node const & node, ParseYaml<char>)      { return convert_signed_integral<char     >(node); }
 YamlResult<short>     convert(YAML::Node const & node, ParseYaml<short>)     { return convert_signed_integral<short    >(node); }
 YamlResult<int>       convert(YAML::Node const & node, ParseYaml<int>)       { return convert_signed_integral<int      >(node); }
 YamlResult<long>      convert(YAML::Node const & node, ParseYaml<long>)      { return convert_signed_integral<long     >(node); }
 YamlResult<long long> convert(YAML::Node const & node, ParseYaml<long long>) { return convert_signed_integral<long long>(node); }
 
+YamlResult<unsigned char>      convert(YAML::Node const & node, ParseYaml<unsigned char>)      { return convert_unsigned_integral<unsigned char     >(node); }
 YamlResult<unsigned short>     convert(YAML::Node const & node, ParseYaml<unsigned short>)     { return convert_unsigned_integral<unsigned short    >(node); }
 YamlResult<unsigned int>       convert(YAML::Node const & node, ParseYaml<unsigned int>)       { return convert_unsigned_integral<unsigned int      >(node); }
 YamlResult<unsigned long>      convert(YAML::Node const & node, ParseYaml<unsigned long>)      { return convert_unsigned_integral<unsigned long     >(node); }
