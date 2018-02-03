@@ -3,6 +3,7 @@
 
 #include <yaml-cpp/yaml.h>
 #include <estd/convert/convert.hpp>
+#include <estd/convert/traits.hpp>
 
 #include <algorithm>
 #include <array>
@@ -45,20 +46,15 @@ struct YamlError {
 template<typename T>
 using YamlResult = dr::result<T, YamlError>;
 
-// Conversion tag for YAML parsers.
-template<typename T> struct ParseYaml {
-	using type = dr::result<T, YamlError>;
-};
-
 /// Trait to check if a type can be converted from a YAML::Node.
 template<typename T>
-constexpr bool can_parse_yaml = estd::can_convert_tagged_v<YAML::Node const &, ParseYaml<T>>;
+constexpr bool can_parse_yaml = estd::can_convert<YAML::Node const &, YamlResult<T>>;
 
 /// Parse a YAML::Node into a type T.
 template<typename T>
 YamlResult<T> parseYaml(YAML::Node const & node) {
 	static_assert(can_parse_yaml<T>, "No yaml conversion defined for T");
-	return convert(node, ParseYaml<T>{});
+	return estd::parse<T, YamlError>(node);
 }
 
 DetailedError expectMap(YAML::Node const & node);
@@ -109,85 +105,96 @@ namespace YAML {
 	};
 }
 
-namespace dr {
+namespace estd {
 
-// conversions for primitives
-YamlResult<std::string> convert(YAML::Node const & node, ParseYaml<std::string>);
-YamlResult<bool>        convert(YAML::Node const & node, ParseYaml<bool>);
+#define DECLARE_YAML_CONVERSION(TYPE) template<> struct conversion<YAML::Node, dr::YamlResult<TYPE>> { \
+	static dr::YamlResult<TYPE> perform(YAML::Node const &) noexcept; \
+}
 
-YamlResult<char>      convert(YAML::Node const & node, ParseYaml<char>);
-YamlResult<short>     convert(YAML::Node const & node, ParseYaml<short>);
-YamlResult<int>       convert(YAML::Node const & node, ParseYaml<int>);
-YamlResult<long>      convert(YAML::Node const & node, ParseYaml<long>);
-YamlResult<long long> convert(YAML::Node const & node, ParseYaml<long long>);
+DECLARE_YAML_CONVERSION(std::string);
+DECLARE_YAML_CONVERSION(bool);
+DECLARE_YAML_CONVERSION(char);
+DECLARE_YAML_CONVERSION(short);
+DECLARE_YAML_CONVERSION(int);
+DECLARE_YAML_CONVERSION(long);
+DECLARE_YAML_CONVERSION(long long);
+DECLARE_YAML_CONVERSION(unsigned char);
+DECLARE_YAML_CONVERSION(unsigned short);
+DECLARE_YAML_CONVERSION(unsigned int);
+DECLARE_YAML_CONVERSION(unsigned long);
+DECLARE_YAML_CONVERSION(unsigned long long);
+DECLARE_YAML_CONVERSION(float);
+DECLARE_YAML_CONVERSION(double);
+DECLARE_YAML_CONVERSION(long double);
 
-YamlResult<unsigned char>      convert(YAML::Node const & node, ParseYaml<unsigned char>);
-YamlResult<unsigned short>     convert(YAML::Node const & node, ParseYaml<unsigned short>);
-YamlResult<unsigned int>       convert(YAML::Node const & node, ParseYaml<unsigned int>);
-YamlResult<unsigned long>      convert(YAML::Node const & node, ParseYaml<unsigned long>);
-YamlResult<unsigned long long> convert(YAML::Node const & node, ParseYaml<unsigned long long>);
-
-YamlResult<float>       convert(YAML::Node const & node, ParseYaml<float>);
-YamlResult<double>      convert(YAML::Node const & node, ParseYaml<double>);
-YamlResult<long double> convert(YAML::Node const & node, ParseYaml<long double>);
+#undef DECLARE_YAML_CONVERSION
 
 // conversion for std::array
 template<typename T, std::size_t N>
-std::enable_if_t<can_parse_yaml<T>, YamlResult<std::array<T, N>>>
-convert(YAML::Node const & node, ParseYaml<std::array<T, N>>) {
-	if (!node.IsSequence()) return YamlError{"unexpected node type, expected sequence, got " + toString(node.Type())};
-	if (node.size() != N)   return YamlError{"wrong number of elements, expected " + std::to_string(N) + ", got " + std::to_string(node.size())};
+struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
+	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
-	std::array<T, N> result;
+	static dr::YamlResult<std::array<T, N>> perform(YAML::Node const & node) noexcept {
+		if (!node.IsSequence()) return dr::YamlError{"unexpected node type, expected sequence, got " + dr::toString(node.Type())};
+		if (node.size() != N)   return dr::YamlError{"wrong number of elements, expected " + std::to_string(N) + ", got " + std::to_string(node.size())};
 
-	int index = 0;
-	for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
-		if (index >= N) return YamlError{"sequence too long, expected " + std::to_string(N) + ", now at index " + std::to_string(index)};
-		YamlResult<T> element = parseYaml<T>(*i);
-		if (!element) return element.error().appendTrace({std::to_string(index), "", i->Type()});
-		result[index++] = std::move(*element);
+		std::array<T, N> result;
+
+		int index = 0;
+		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
+			if (index >= N) return dr::YamlError{"sequence too long, expected " + std::to_string(N) + ", now at index " + std::to_string(index)};
+			dr::YamlResult<T> element = dr::parseYaml<T>(*i);
+			if (!element) return element.error().appendTrace({std::to_string(index), "", i->Type()});
+			result[index++] = std::move(*element);
+		}
+
+		return result;
 	}
-
-	return result;
-}
+};
 
 // conversion for std::vector
 template<typename T>
-std::enable_if_t<can_parse_yaml<T>, YamlResult<std::vector<T>>>
-convert(YAML::Node const & node, ParseYaml<std::vector<T>>) {
-	if (node.IsNull()) return std::vector<T>{};
-	if (!node.IsSequence()) return YamlError{"unexpected node type, expected sequence, got " + toString(node.Type())};
+struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
+	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
-	std::vector<T> result;
-	result.reserve(node.size());
+	static dr::YamlResult<std::vector<T>> perform(YAML::Node const & node) {
+		if (node.IsNull()) return std::vector<T>{};
+		if (!node.IsSequence()) return dr::YamlError{"unexpected node type, expected sequence, got " + dr::toString(node.Type())};
 
-	int index = 0;
-	for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
-		YamlResult<T> element = parseYaml<T>(*i);
-		if (!element) return element.error().appendTrace({std::to_string(index), "", i->Type()});
-		result.push_back(std::move(*element));
-		++index;
+		std::vector<T> result;
+		result.reserve(node.size());
+
+		int index = 0;
+		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
+			dr::YamlResult<T> element = dr::parseYaml<T>(*i);
+			if (!element) return element.error().appendTrace({std::to_string(index), "", i->Type()});
+			result.push_back(std::move(*element));
+			++index;
+		}
+
+		return result;
 	}
-
-	return result;
-}
+};
 
 // conversion for std::map<std::string, T>
 template<typename T>
-std::enable_if_t<can_parse_yaml<T>, YamlResult<std::map<std::string, T>>>
-convert(YAML::Node const & node, YamlResult<std::map<std::string, T>>) {
-	if (!node.IsMap()) return YamlError{"unexpected node type, expected map, got " + toString(node.Type())};
+struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
+	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
-	std::map<std::string, T> result;
+	static dr::YamlResult<std::map<std::string, T>> perform(YAML::Node const & node) {
+		if (!node.IsMap()) return dr::YamlError{"unexpected node type, expected map, got " + dr::toString(node.Type())};
 
-	for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
-		std::string const & name = i->first.Scalar();
-		YamlResult<T> element = parseYaml<T>(i->second);
-		if (!element) return element.error().appendTrace({name, "", i->second.Type()});
-		result.insert(name, std::move(*element));
+		std::map<std::string, T> result;
+
+		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
+			std::string const & name = i->first.Scalar();
+			dr::YamlResult<T> element = dr::parseYaml<T>(i->second);
+			if (!element) return element.error().appendTrace({name, "", i->second.Type()});
+			result.insert(name, std::move(*element));
+		}
+
+		return result;
 	}
-
-	return result;
-}
+};
 
 }
