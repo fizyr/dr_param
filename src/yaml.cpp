@@ -1,4 +1,5 @@
 #include "yaml.hpp"
+#include "yaml_macros.hpp"
 
 #include <dr_util/expand.hpp>
 
@@ -174,14 +175,12 @@ namespace estd {
 		}
 	}
 
-	#define DEFINE_YAML_CONVERSION(TYPE) YamlResult<TYPE> conversion<YAML::Node, YamlResult<TYPE>>::perform(YAML::Node const & node) noexcept
-
-	DEFINE_YAML_CONVERSION(std::string) {
+	DR_PARAM_DEFINE_YAML_CONVERSION(std::string, node) {
 		if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
 		return node.Scalar();
 	}
 
-	DEFINE_YAML_CONVERSION(bool) {
+	DR_PARAM_DEFINE_YAML_CONVERSION(bool, node) {
 		if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
 
 		std::string raw = node.Scalar();
@@ -192,21 +191,19 @@ namespace estd {
 		return YamlError{"invalid boolean value: " + node.Scalar()};
 	}
 
-	DEFINE_YAML_CONVERSION(char     ) { return convert_signed_integral<char     >(node); }
-	DEFINE_YAML_CONVERSION(short    ) { return convert_signed_integral<short    >(node); }
-	DEFINE_YAML_CONVERSION(int      ) { return convert_signed_integral<int      >(node); }
-	DEFINE_YAML_CONVERSION(long     ) { return convert_signed_integral<long     >(node); }
-	DEFINE_YAML_CONVERSION(long long) { return convert_signed_integral<long long>(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(char     , node) { return convert_signed_integral<char     >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(short    , node) { return convert_signed_integral<short    >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(int      , node) { return convert_signed_integral<int      >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(long     , node) { return convert_signed_integral<long     >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(long long, node) { return convert_signed_integral<long long>(node); }
 
-	DEFINE_YAML_CONVERSION(unsigned char     ) { return convert_unsigned_integral<unsigned char     >(node); }
-	DEFINE_YAML_CONVERSION(unsigned short    ) { return convert_unsigned_integral<unsigned short    >(node); }
-	DEFINE_YAML_CONVERSION(unsigned int      ) { return convert_unsigned_integral<unsigned int      >(node); }
-	DEFINE_YAML_CONVERSION(unsigned long     ) { return convert_unsigned_integral<unsigned long     >(node); }
-	DEFINE_YAML_CONVERSION(unsigned long long) { return convert_unsigned_integral<unsigned long long>(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned char     , node) { return convert_unsigned_integral<unsigned char     >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned short    , node) { return convert_unsigned_integral<unsigned short    >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned int      , node) { return convert_unsigned_integral<unsigned int      >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned long     , node) { return convert_unsigned_integral<unsigned long     >(node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned long long, node) { return convert_unsigned_integral<unsigned long long>(node); }
 
-	DEFINE_YAML_CONVERSION(float      ) { return convert_floating_point<float>      (node); }
-	DEFINE_YAML_CONVERSION(double     ) { return convert_floating_point<double>     (node); }
-	DEFINE_YAML_CONVERSION(long double) { return convert_floating_point<long double>(node); }
-
-	#undef DEFINE_YAML_CONVERSION
+	DR_PARAM_DEFINE_YAML_CONVERSION(float      , node) { return convert_floating_point<float>      (node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(double     , node) { return convert_floating_point<double>     (node); }
+	DR_PARAM_DEFINE_YAML_CONVERSION(long double, node) { return convert_floating_point<long double>(node); }
 }
