@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <locale>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -57,11 +58,11 @@ YamlResult<T> parseYaml(YAML::Node const & node) {
 	return estd::parse<T, YamlError>(node);
 }
 
-DetailedError expectMap(YAML::Node const & node);
-DetailedError expectMap(YAML::Node const & node, std::size_t size);
-DetailedError expectSequence(YAML::Node const & node);
-DetailedError expectSequence(YAML::Node const & node, std::size_t size);
-DetailedError expectScalar(YAML::Node const & node);
+std::optional<YamlError> expectMap(YAML::Node const & node);
+std::optional<YamlError> expectMap(YAML::Node const & node, std::size_t size);
+std::optional<YamlError> expectSequence(YAML::Node const & node);
+std::optional<YamlError> expectSequence(YAML::Node const & node, std::size_t size);
+std::optional<YamlError> expectScalar(YAML::Node const & node);
 
 std::string toString(YAML::NodeType::value);
 
@@ -135,8 +136,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
 	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::array<T, N>> perform(YAML::Node const & node) noexcept {
-		if (!node.IsSequence()) return dr::YamlError{"unexpected node type, expected sequence, got " + dr::toString(node.Type())};
-		if (node.size() != N)   return dr::YamlError{"wrong number of elements, expected " + std::to_string(N) + ", got " + std::to_string(node.size())};
+		if (auto error = dr::expectSequence(node, N)) return *error;
 
 		std::array<T, N> result;
 
@@ -159,7 +159,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
 
 	static dr::YamlResult<std::vector<T>> perform(YAML::Node const & node) {
 		if (node.IsNull()) return std::vector<T>{};
-		if (!node.IsSequence()) return dr::YamlError{"unexpected node type, expected sequence, got " + dr::toString(node.Type())};
+		if (auto error = dr::expectSequence(node)) return *error;
 
 		std::vector<T> result;
 		result.reserve(node.size());
@@ -182,7 +182,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
 	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::map<std::string, T>> perform(YAML::Node const & node) {
-		if (!node.IsMap()) return dr::YamlError{"unexpected node type, expected map, got " + dr::toString(node.Type())};
+		if (auto error = dr::expectMap(node)) return *error;
 
 		std::map<std::string, T> result;
 

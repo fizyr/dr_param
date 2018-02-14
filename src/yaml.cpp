@@ -1,12 +1,9 @@
 #include "yaml.hpp"
 #include "yaml_macros.hpp"
 
-#include <dr_util/expand.hpp>
-
 #include <fmt/format.h>
 
-#include <boost/filesystem.hpp>
-
+#include <algorithm>
 #include <cerrno>
 #include <fstream>
 
@@ -66,33 +63,34 @@ std::string toString(YAML::NodeType::value type) {
 	return "unknown";
 }
 
-DetailedError expectMap(YAML::Node const & node) {
-	if (!node) return DetailedError{std::errc::invalid_argument, fmt::format("no such node")};
-	if (node.IsMap()) return {};
-	return DetailedError{std::errc::invalid_argument, fmt::format("invalid node type at {}:{}: expected a map", node.Mark().line, node.Mark().column)};
+std::optional<YamlError> expectMap(YAML::Node const & node) {
+	if (!node) return YamlError{"no such node"};
+	if (!node) return std::nullopt;
+	if (node.IsMap()) return std::nullopt;
+	return YamlError{fmt::format("invalid node type: expected map, got {}", toString(node.Type()))};
 }
 
-DetailedError expectMap(YAML::Node const & node, std::size_t size) {
+std::optional<YamlError> expectMap(YAML::Node const & node, std::size_t size) {
 	if (auto error = expectMap(node)) return error;
-	if (node.size() == size) return {};
-	return DetailedError{std::errc::invalid_argument, fmt::format("invalid node size at {}:{}: expected {} child nodes, got {}", node.Mark().line, node.Mark().column, size, node.size())};
+	if (node.size() == size) return std::nullopt;
+	return YamlError{fmt::format("invalid map size: expected {} child nodes, got {}",size, node.size())};
 }
 
-DetailedError expectSequence(YAML::Node const & node) {
-	if (!node) return DetailedError{std::errc::invalid_argument, fmt::format("no such node")};
-	if (node.IsSequence()) return {};
-	return DetailedError{std::errc::invalid_argument, fmt::format("invalid node type at {}:{}: expected a list", node.Mark().line, node.Mark().column)};
+std::optional<YamlError> expectSequence(YAML::Node const & node) {
+	if (!node) return YamlError{"no such node"};
+	if (node.IsSequence()) return std::nullopt;
+	return YamlError{fmt::format("invalid node type: expected list, got {}", toString(node.Type()))};
 }
-DetailedError expectSequence(YAML::Node const & node, std::size_t size) {
+std::optional<YamlError> expectSequence(YAML::Node const & node, std::size_t size) {
 	if (auto error = expectSequence(node)) return error;
-	if (node.size() == size) return {};
-	return DetailedError{std::errc::invalid_argument, fmt::format("invalid list size at {}:{}: expected {} elements, got {}", node.Mark().line, node.Mark().column, size, node.size())};
+	if (node.size() == size) return std::nullopt;
+	return YamlError{fmt::format("invalid list size: expected {} elements, got {}", size, node.size())};
 }
 
-DetailedError expectScalar(YAML::Node const & node) {
-	if (!node) return DetailedError{std::errc::invalid_argument, fmt::format("no such node")};
-	if (node.IsScalar()) return {};
-	return DetailedError{std::errc::invalid_argument, fmt::format("invalid node type at {}:{}: expected a scalar", node.Mark().line, node.Mark().column)};
+std::optional<YamlError> expectScalar(YAML::Node const & node) {
+	if (!node) return YamlError{"no such node"};
+	if (node.IsScalar()) return std::nullopt;
+	return YamlError{fmt::format("invalid node type: expected scalar, got {}", toString(node.Type()))};
 }
 
 ErrorOr<YAML::Node> readYamlFile(std::string const & path) {
@@ -115,7 +113,7 @@ namespace estd {
 	namespace {
 		template<typename T>
 		YamlResult<T> convert_signed_integral(YAML::Node const & node) {
-			if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
+			if (auto error = expectScalar(node)) return *error;
 
 			std::string const & raw = node.Scalar();
 			std::size_t parsed = 0;
@@ -136,7 +134,7 @@ namespace estd {
 
 		template<typename T>
 		YamlResult<T> convert_unsigned_integral(YAML::Node const & node) {
-			if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
+			if (auto error = expectScalar(node)) return *error;
 
 			std::string const & raw = node.Scalar();
 			std::size_t parsed = 0;
@@ -157,7 +155,7 @@ namespace estd {
 
 		template<typename T>
 		YamlResult<T> convert_floating_point(YAML::Node const & node) {
-			if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
+			if (auto error = expectScalar(node)) return *error;
 
 			std::string const & raw = node.Scalar();
 			std::size_t parsed = 0;
@@ -176,12 +174,12 @@ namespace estd {
 	}
 
 	DR_PARAM_DEFINE_YAML_CONVERSION(std::string, node) {
-		if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
+		if (auto error = expectScalar(node)) return *error;
 		return node.Scalar();
 	}
 
 	DR_PARAM_DEFINE_YAML_CONVERSION(bool, node) {
-		if (!node.IsScalar()) return YamlError{"unexpected node type, expected scalar, got " + toString(node.Type())};
+		if (auto error = expectScalar(node)) return *error;
 
 		std::string raw = node.Scalar();
 		std::transform(raw.begin(), raw.end(), raw.begin(), [] (char c) { return std::tolower(c); });
