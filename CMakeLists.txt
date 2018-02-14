@@ -32,6 +32,7 @@ include_directories(SYSTEM
 add_library(${PROJECT_NAME}
 	src/xmlrpc.cpp
 	src/yaml.cpp
+	src/yaml_parser.cpp
 	src/yaml_preprocess.cpp
 )
 
