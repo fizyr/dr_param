@@ -4,6 +4,7 @@
 #include <dr_error/error_or.hpp>
 #include <estd/convert/convert.hpp>
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>

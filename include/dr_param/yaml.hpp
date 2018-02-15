@@ -6,7 +6,6 @@
 #include <estd/convert/traits.hpp>
 
 #include <algorithm>
-#include <array>
 #include <locale>
 #include <optional>
 #include <stdexcept>
@@ -85,25 +84,6 @@ ErrorOr<T> convertChild(YAML::Node const & node, std::string const & key) {
 	}
 }
 
-}
-
-namespace YAML {
-	template<typename T, std::size_t N>
-	struct convert<std::array<T, N>> {
-		static Node encode(std::array<T, N> const & array) {
-			Node result;
-			for (T const & val : array) result.push_back(Node{val});
-			return result;
-		}
-		static bool decode(Node const & node, std::array<T, N> & result) {
-			if (!node.IsSequence()) return false;
-			if (node.size() != N) return false;
-			for (std::size_t i = 0; i < N; ++i) {
-				if (!convert<T>::decode(node[i], result[i])) return false;
-			}
-			return true;
-		}
-	};
 }
 
 namespace estd {
