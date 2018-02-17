@@ -1,5 +1,4 @@
 #pragma once
-
 #include "xmlrpc.hpp"
 
 #include <ros/param.h>

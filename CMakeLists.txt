@@ -32,7 +32,6 @@ include_directories(SYSTEM
 add_library(${PROJECT_NAME}
 	src/xmlrpc.cpp
 	src/yaml.cpp
-	src/yaml_parser.cpp
 	src/yaml_preprocess.cpp
 )
 
@@ -44,6 +43,8 @@ catkin_add_gtest(${PROJECT_NAME}_test_xmlrpc test/xmlrpc.cpp)
 target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
 catkin_add_gtest(${PROJECT_NAME}_test_yaml test/yaml.cpp)
 target_link_libraries(${PROJECT_NAME}_test_yaml ${PROJECT_NAME})
+catkin_add_gtest(${PROJECT_NAME}_test_yaml_decompose test/yaml_decompose.cpp)
+target_link_libraries(${PROJECT_NAME}_test_yaml_decompose ${PROJECT_NAME})
 catkin_add_gtest(${PROJECT_NAME}_test_yaml_preprocess test/yaml_preprocess.cpp)
 target_link_libraries(${PROJECT_NAME}_test_yaml_preprocess ${PROJECT_NAME})
 
