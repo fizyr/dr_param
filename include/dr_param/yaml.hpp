@@ -156,24 +156,47 @@ struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
 	}
 };
 
+namespace detail {
+	// conversion for std::map<Key, Value>
+	template<typename Key, typename Value>
+	dr::YamlResult<std::map<Key, Value>> parseYamlMap(YAML::Node const & node) {
+		if (auto error = dr::expectMap(node)) return *error;
+
+		std::map<Key, Value> result;
+
+		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
+			std::string const & name = i->first.Scalar();
+
+			dr::YamlResult<Key> key = dr::parseYaml<Key>(i->first);
+			if (!key) return key.error().appendTrace({name, "", i->first.Type()});
+
+			dr::YamlResult<Value> value = dr::parseYaml<Value>(i->second);
+			if (!value) return value.error().appendTrace({name, "", i->second.Type()});
+
+			result.emplace(std::move(*key), std::move(*value));
+		}
+
+		return result;
+	}
+}
+
 // conversion for std::map<std::string, T>
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
 	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::map<std::string, T>> perform(YAML::Node const & node) {
-		if (auto error = dr::expectMap(node)) return *error;
+		return detail::parseYamlMap<std::string, T>(node);
+	}
+};
 
-		std::map<std::string, T> result;
+// conversion for std::map<std::string, T>
+template<typename T>
+struct conversion<YAML::Node, dr::YamlResult<std::map<int, T>>> {
+	static constexpr bool impossible = !dr::can_parse_yaml<T>;
 
-		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
-			std::string const & name = i->first.Scalar();
-			dr::YamlResult<T> element = dr::parseYaml<T>(i->second);
-			if (!element) return element.error().appendTrace({name, "", i->second.Type()});
-			result.insert(name, std::move(*element));
-		}
-
-		return result;
+	static dr::YamlResult<std::map<int, T>> perform(YAML::Node const & node) {
+		return detail::parseYamlMap<int, T>(node);
 	}
 };
 
