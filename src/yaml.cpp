@@ -107,101 +107,99 @@ ErrorOr<YAML::Node> readYamlFile(std::string const & path) {
 }
 
 // New style YAML conversions.
-namespace estd {
-	using namespace dr;
+using namespace dr;
 
-	namespace {
-		template<typename T>
-		YamlResult<T> convert_signed_integral(YAML::Node const & node) {
-			if (auto error = expectScalar(node)) return *error;
-
-			std::string const & raw = node.Scalar();
-			std::size_t parsed = 0;
-			long long value = 0;
-			try {
-				value = std::stoll(raw, &parsed);
-			} catch (std::invalid_argument &e) {
-				return YamlError{"invalid integer value: " + raw};
-			} catch (std::range_error const & e) {
-				return YamlError{"integer value out of range: " + raw};
-			}
-
-			if (parsed != raw.size()) return YamlError{"invalid integer value: " + raw};
-			if (value > std::numeric_limits<T>::max())    YamlError{"integer value out of range: " + raw};
-			if (value < std::numeric_limits<T>::lowest()) YamlError{"integer value out of range: " + raw};
-			return T(value);
-		}
-
-		template<typename T>
-		YamlResult<T> convert_unsigned_integral(YAML::Node const & node) {
-			if (auto error = expectScalar(node)) return *error;
-
-			std::string const & raw = node.Scalar();
-			std::size_t parsed = 0;
-			unsigned long long value = 0;
-			try {
-				value = std::stoull(raw, &parsed);
-			} catch (std::invalid_argument &e) {
-				return YamlError{"invalid integer value: " + raw};
-			} catch (std::range_error const & e) {
-				return YamlError{"integer value out of range: " + raw};
-			}
-
-			if (parsed != raw.size()) return YamlError{"invalid integer value: " + raw};
-			if (value > std::numeric_limits<T>::max())    YamlError{"integer value out of range: " + raw};
-			if (value < std::numeric_limits<T>::lowest()) YamlError{"integer value out of range: " + raw};
-			return T(value);
-		}
-
-		template<typename T>
-		YamlResult<T> convert_floating_point(YAML::Node const & node) {
-			if (auto error = expectScalar(node)) return *error;
-
-			std::string const & raw = node.Scalar();
-			std::size_t parsed = 0;
-			long double value = 0;
-			try {
-				value = std::stold(raw, &parsed);
-			} catch (std::invalid_argument &e) {
-				return YamlError{"invalid floating point value: " + raw};
-			} catch (std::range_error const & e) {
-				return YamlError{"floating point value out of range: " + raw};
-			}
-
-			if (parsed != raw.size()) return YamlError{"invalid floating point value: " + raw};
-			return T(value);
-		}
-	}
-
-	DR_PARAM_DEFINE_YAML_CONVERSION(std::string, node) {
-		if (auto error = expectScalar(node)) return *error;
-		return node.Scalar();
-	}
-
-	DR_PARAM_DEFINE_YAML_CONVERSION(bool, node) {
+namespace {
+	template<typename T>
+	YamlResult<T> convert_signed_integral(YAML::Node const & node) {
 		if (auto error = expectScalar(node)) return *error;
 
-		std::string raw = node.Scalar();
-		std::transform(raw.begin(), raw.end(), raw.begin(), [] (char c) { return std::tolower(c); });
+		std::string const & raw = node.Scalar();
+		std::size_t parsed = 0;
+		long long value = 0;
+		try {
+			value = std::stoll(raw, &parsed);
+		} catch (std::invalid_argument &e) {
+			return YamlError{"invalid integer value: " + raw};
+		} catch (std::range_error const & e) {
+			return YamlError{"integer value out of range: " + raw};
+		}
 
-		if (raw == "y" || raw == "yes" || raw == "true"  || raw == "on"   || raw == "1") return true;
-		if (raw == "n" || raw == "no"  || raw == "false" || raw == "ooff" || raw == "0") return false;
-		return YamlError{"invalid boolean value: " + node.Scalar()};
+		if (parsed != raw.size()) return YamlError{"invalid integer value: " + raw};
+		if (value > std::numeric_limits<T>::max())    YamlError{"integer value out of range: " + raw};
+		if (value < std::numeric_limits<T>::lowest()) YamlError{"integer value out of range: " + raw};
+		return T(value);
 	}
 
-	DR_PARAM_DEFINE_YAML_CONVERSION(char     , node) { return convert_signed_integral<char     >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(short    , node) { return convert_signed_integral<short    >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(int      , node) { return convert_signed_integral<int      >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(long     , node) { return convert_signed_integral<long     >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(long long, node) { return convert_signed_integral<long long>(node); }
+	template<typename T>
+	YamlResult<T> convert_unsigned_integral(YAML::Node const & node) {
+		if (auto error = expectScalar(node)) return *error;
 
-	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned char     , node) { return convert_unsigned_integral<unsigned char     >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned short    , node) { return convert_unsigned_integral<unsigned short    >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned int      , node) { return convert_unsigned_integral<unsigned int      >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned long     , node) { return convert_unsigned_integral<unsigned long     >(node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(unsigned long long, node) { return convert_unsigned_integral<unsigned long long>(node); }
+		std::string const & raw = node.Scalar();
+		std::size_t parsed = 0;
+		unsigned long long value = 0;
+		try {
+			value = std::stoull(raw, &parsed);
+		} catch (std::invalid_argument &e) {
+			return YamlError{"invalid integer value: " + raw};
+		} catch (std::range_error const & e) {
+			return YamlError{"integer value out of range: " + raw};
+		}
 
-	DR_PARAM_DEFINE_YAML_CONVERSION(float      , node) { return convert_floating_point<float>      (node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(double     , node) { return convert_floating_point<double>     (node); }
-	DR_PARAM_DEFINE_YAML_CONVERSION(long double, node) { return convert_floating_point<long double>(node); }
+		if (parsed != raw.size()) return YamlError{"invalid integer value: " + raw};
+		if (value > std::numeric_limits<T>::max())    YamlError{"integer value out of range: " + raw};
+		if (value < std::numeric_limits<T>::lowest()) YamlError{"integer value out of range: " + raw};
+		return T(value);
+	}
+
+	template<typename T>
+	YamlResult<T> convert_floating_point(YAML::Node const & node) {
+		if (auto error = expectScalar(node)) return *error;
+
+		std::string const & raw = node.Scalar();
+		std::size_t parsed = 0;
+		long double value = 0;
+		try {
+			value = std::stold(raw, &parsed);
+		} catch (std::invalid_argument &e) {
+			return YamlError{"invalid floating point value: " + raw};
+		} catch (std::range_error const & e) {
+			return YamlError{"floating point value out of range: " + raw};
+		}
+
+		if (parsed != raw.size()) return YamlError{"invalid floating point value: " + raw};
+		return T(value);
+	}
 }
+
+DR_PARAM_DEFINE_YAML_DECODE(std::string, node) {
+	if (auto error = expectScalar(node)) return *error;
+	return node.Scalar();
+}
+
+DR_PARAM_DEFINE_YAML_DECODE(bool, node) {
+	if (auto error = expectScalar(node)) return *error;
+
+	std::string raw = node.Scalar();
+	std::transform(raw.begin(), raw.end(), raw.begin(), [] (char c) { return std::tolower(c); });
+
+	if (raw == "y" || raw == "yes" || raw == "true"  || raw == "on"   || raw == "1") return true;
+	if (raw == "n" || raw == "no"  || raw == "false" || raw == "ooff" || raw == "0") return false;
+	return dr::YamlError{"invalid boolean value: " + node.Scalar()};
+}
+
+DR_PARAM_DEFINE_YAML_DECODE(char     , node) { return convert_signed_integral<char     >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(short    , node) { return convert_signed_integral<short    >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(int      , node) { return convert_signed_integral<int      >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(long     , node) { return convert_signed_integral<long     >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(long long, node) { return convert_signed_integral<long long>(node); }
+
+DR_PARAM_DEFINE_YAML_DECODE(unsigned char     , node) { return convert_unsigned_integral<unsigned char     >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(unsigned short    , node) { return convert_unsigned_integral<unsigned short    >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(unsigned int      , node) { return convert_unsigned_integral<unsigned int      >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(unsigned long     , node) { return convert_unsigned_integral<unsigned long     >(node); }
+DR_PARAM_DEFINE_YAML_DECODE(unsigned long long, node) { return convert_unsigned_integral<unsigned long long>(node); }
+
+DR_PARAM_DEFINE_YAML_DECODE(float      , node) { return convert_floating_point<float>      (node); }
+DR_PARAM_DEFINE_YAML_DECODE(double     , node) { return convert_floating_point<double>     (node); }
+DR_PARAM_DEFINE_YAML_DECODE(long double, node) { return convert_floating_point<long double>(node); }

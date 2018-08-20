@@ -48,13 +48,24 @@ using YamlResult = dr::result<T, YamlError>;
 
 /// Trait to check if a type can be converted from a YAML::Node.
 template<typename T>
-constexpr bool can_parse_yaml = estd::can_convert<YAML::Node const &, YamlResult<T>>;
+constexpr bool can_encode_yaml = estd::can_convert<T, YAML::Node>;
+
+/// Trait to check if a type can be converted from a YAML::Node.
+template<typename T>
+constexpr bool can_parse_yaml = estd::can_convert<YAML::Node, YamlResult<T>>;
 
 /// Parse a YAML::Node into a type T.
 template<typename T>
 YamlResult<T> parseYaml(YAML::Node const & node) {
-	static_assert(can_parse_yaml<T>, "No yaml conversion defined for T");
+	static_assert(can_parse_yaml<T>, "No YAML conversion defined for T");
 	return estd::parse<T, YamlError>(node);
+}
+
+/// Encode a value T into a YAML::Node.
+template<typename T>
+YAML::Node encodeYaml(T const & value) {
+	static_assert(can_encode_yaml<T>, "No YAML conversion defined for T");
+	return estd::convert<YAML::Node>(value);
 }
 
 std::optional<YamlError> expectMap(YAML::Node const & node);
