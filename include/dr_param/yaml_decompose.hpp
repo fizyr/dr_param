@@ -40,6 +40,8 @@ YAML::Node encodeDecomposableAsYaml(T const & object) {
 	auto members = param::decompose<T>();
 
 	estd::for_each(members, [&] (auto const & member) {
+		using member_type = std::decay_t<decltype(member.access(object))>;
+		static_assert(dr::can_parse_yaml<member_type>, "No YAML conversion available for member.");
 		result[member.name] = estd::convert<YAML::Node>(member.access(object));
 	});
 

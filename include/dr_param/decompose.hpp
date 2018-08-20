@@ -134,9 +134,7 @@ auto memberInfo(std::string name, std::string type, std::string description, boo
  * It should return a tuple of structs that implement the `MemberInfo` concept.
  */
 template<typename T>
-struct Decomposition {
-	static_assert(!std::is_same_v<T, T>, "no decomposition available for given type T");
-};
+struct Decomposition;
 
 namespace detail {
 	template<typename T, typename = void> struct can_decompose_ : std::false_type {};
