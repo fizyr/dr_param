@@ -5,6 +5,39 @@
 
 namespace dr::param {
 
+namespace detail {
+	template<typename T>
+	struct is_reference_wrapper : std::false_type {};
+
+	template<typename T>
+	struct is_reference_wrapper<std::reference_wrapper<T>> : std::true_type {};
+
+	template<typename T>
+	struct dereference_t {
+		using type = T;
+	};
+
+	template<typename T>
+	struct dereference_t<T *> {
+		using type = T &;
+	};
+
+	template<typename T>
+	struct dereference_t<std::reference_wrapper<T>> {
+		using type = T &;
+	};
+}
+
+template<typename T>
+constexpr bool is_reference_wrapper = detail::is_reference_wrapper<T>{};
+
+template<typename T>
+constexpr bool is_dereferencable = std::is_pointer_v<T> || is_reference_wrapper<T>;
+
+template<typename T>
+using dereferenced_t = typename detail::dereference_t<T>::type;
+
+
 /// Base class for implementing a class that implements the MemberInfo concept.
 /**
  * The MemberInfo concept requires the members of MemberInfoBase seen here,
@@ -38,11 +71,37 @@ template<typename T, typename F>
 struct MemberInfo : MemberInfoBase {
 	F accessor;
 
-	static_assert(std::is_pointer_v<std::invoke_result_t<F, T const &>>, "result of invoking accessor(T const &) must be a pointer");
-	static_assert(std::is_pointer_v<std::invoke_result_t<F, T       &>>, "result of invoking accessor(T &) must be a pointer");
+	using const_accesor_type = std::invoke_result_t<F, T const &>;
+	using   mut_accesor_type = std::invoke_result_t<F, T       &>;
 
-	auto access(T const & parent) const { return accessor(parent); }
-	auto access(T       & parent) const { return accessor(parent); }
+	using const_result_type = std::conditional_t<std::is_pointer_v<const_accesor_type>,
+		dereferenced_t<const_accesor_type>,
+		const_accesor_type
+	>;
+
+	using mut_result_type = std::conditional_t<is_dereferencable<mut_accesor_type>,
+		dereferenced_t<mut_accesor_type>,
+		mut_accesor_type
+	>;
+
+	static_assert(std::is_reference_v<mut_accesor_type> || std::is_pointer_v<mut_accesor_type> || is_reference_wrapper<mut_accesor_type>,
+		"result of invoking accessor(T &) must be a reference, pointer or std::reference_wrapper");
+
+	const_result_type access(T const & parent) const {
+		if constexpr (std::is_pointer_v<const_accesor_type>) {
+			return *accessor(parent);
+		} else {
+			return accessor(parent);
+		}
+	}
+
+	mut_result_type access(T & parent) const {
+		if constexpr (std::is_pointer_v<mut_accesor_type> || is_reference_wrapper<mut_accesor_type>) {
+			return *accessor(parent);
+		} else {
+			return accessor(parent);
+		}
+	}
 };
 
 /// Concrete implementation of MemberInfo concept using a pointer to member function.
@@ -50,8 +109,8 @@ template<typename T, typename M>
 struct MemberPtrInfo : MemberInfoBase {
 	M T::* member;
 
-	M const * access(T const & parent) const { return &(parent.*member); }
-	M       * access(T       & parent) const { return &(parent.*member); }
+	M const & access(T const & parent) const { return parent.*member; }
+	M       & access(T       & parent) const { return parent.*member; }
 };
 
 

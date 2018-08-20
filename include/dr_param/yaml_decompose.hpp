@@ -40,7 +40,7 @@ YAML::Node encodeDecomposableAsYaml(T const & object) {
 	auto members = param::decompose<T>();
 
 	estd::for_each(members, [&] (auto const & member) {
-		result[member.name] = estd::convert<YAML::Node>(*member.access(object));
+		result[member.name] = estd::convert<YAML::Node>(member.access(object));
 	});
 
 	return result;
@@ -80,15 +80,14 @@ std::optional<YamlError> parseDecomposableFromYaml(YAML::Node const & node, T & 
 			if (key != member_info.name) return true;
 
 			// Get a reference to actual member, and it's type.
-			auto member = member_info.access(object);
-			using member_type     = std::decay_t<std::remove_pointer_t<decltype(member)>>;
+			using member_type     = std::decay_t<decltype(member_info.access(object))>;
 
 			// Try parsing the member from the YAML value.
 			auto result = parseYaml<member_type>(value);
 			if (!result) {
 				error = result.error().appendTrace({member_info.name, member_info.type, value.Type()});
 			} else {
-				*member = std::move(*result);
+				member_info.access(object) = std::move(*result);
 				parsed = true;
 			}
 
