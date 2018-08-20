@@ -128,7 +128,7 @@ DECLARE_YAML_CONVERSION(long double);
 // conversion for std::array
 template<typename T, std::size_t N>
 struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
-	static constexpr bool impossible = !dr::can_parse_yaml<T>;
+	static constexpr bool possible = dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::array<T, N>> perform(YAML::Node const & node) noexcept {
 		if (auto error = dr::expectSequence(node, N)) return *error;
@@ -150,7 +150,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
 // conversion for std::vector
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
-	static constexpr bool impossible = !dr::can_parse_yaml<T>;
+	static constexpr bool possible = dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::vector<T>> perform(YAML::Node const & node) {
 		if (node.IsNull()) return std::vector<T>{};
@@ -198,7 +198,7 @@ namespace detail {
 // conversion for std::map<std::string, T>
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
-	static constexpr bool impossible = !dr::can_parse_yaml<T>;
+	static constexpr bool possible = dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::map<std::string, T>> perform(YAML::Node const & node) {
 		return detail::parseYamlMap<std::string, T>(node);
@@ -208,7 +208,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
 // conversion for std::map<std::string, T>
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::map<int, T>>> {
-	static constexpr bool impossible = !dr::can_parse_yaml<T>;
+	static constexpr bool possible = dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::map<int, T>> perform(YAML::Node const & node) {
 		return detail::parseYamlMap<int, T>(node);
