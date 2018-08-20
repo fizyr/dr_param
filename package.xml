@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
 	<name>dr_param</name>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<description>Alternative interface to parameter loading to support more complex structures.</description>
 	<license>Apache v2.0</license>
 	<author email="maarten@de-vri.es">Maarten de Vries</author>
