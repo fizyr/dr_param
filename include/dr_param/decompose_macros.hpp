@@ -24,7 +24,7 @@
  * DR_PARAM_DEFINE_DECOMPOSITION(T,
  *  ("bar", "int",    "The bar member of T", true, &T::bar)
  *  ("baz", "double", "The baz member of T", true, [] (auto & v) { return v.baz() })
- * )
+ * );
  *
  * This macro defines a specialization for the struct dr::param::Decomposition<Foo>.
  *
@@ -32,13 +32,11 @@
  * See that function for more details.
  */
 #define DR_PARAM_DEFINE_DECOMPOSITION(T, ...) \
-namespace dr::param { \
-	template<> struct Decomposition<T> { \
-		using Type = T; \
-		static auto decompose() { \
-			return DR_PARAM_MEMBERS_TUPLE(__VA_ARGS__); \
-		} \
-	}; \
+template<> struct dr::param::Decomposition<T> { \
+	using Type = T; \
+	static auto decompose() { \
+		return DR_PARAM_MEMBERS_TUPLE(__VA_ARGS__); \
+	} \
 }
 
 #define DR_PARAM_MEMBER_TUPLE_STRUCT_ENTRY_FIRST_END
@@ -60,7 +58,7 @@ namespace dr::param { \
  * DR_PARAM_DEFINE_STRUCT_DECOMPOSITION(T,
  *  (bar, "int",    "The bar member of T", true)
  *  (baz, "double", "The baz member of T", true)
- * )
+ * );
  *
  * This macro defines a specialization for the struct dr::param::Decomposition<T>.
  *
@@ -68,11 +66,9 @@ namespace dr::param { \
  * each one is turned into a call to dr::param::memberInfo("member", type, description, required, &T::member).
  */
 #define DR_PARAM_DEFINE_STRUCT_DECOMPOSITION(T, MEMBERS) \
-namespace dr::param { \
-	template<> struct Decomposition<T> { \
-		using Type = T; \
-		static auto decompose() { \
-			return DR_PARAM_STRUCT_MEMBERS_TUPLE(MEMBERS); \
-		} \
-	}; \
+template<> struct dr::param::Decomposition<T> { \
+	using Type = T; \
+	static auto decompose() { \
+		return DR_PARAM_STRUCT_MEMBERS_TUPLE(MEMBERS); \
+	} \
 }

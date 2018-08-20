@@ -48,7 +48,7 @@ YAML::Node encodeDecomposableAsYaml(T const & object) {
 
 /// Convert a YAML::Node to a decomposable type.
 /**
- * The YAML node must be a map with atleast each required member in the decomposition of T.
+ * The YAML node must be a map with each required member in the decomposition of T.
  * The YAML node may not contain any children not listed in the decomposition of T.
  */
 template<typename T>
