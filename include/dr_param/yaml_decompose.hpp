@@ -118,6 +118,18 @@ std::optional<YamlError> parseDecomposableFromYaml(YAML::Node const & node, T & 
 	return error;
 }
 
+/// Convert a YAML::Node to a decomposable type.
+/**
+ * The YAML node must be a map with each required member in the decomposition of T.
+ * The YAML node may not contain any children not listed in the decomposition of T.
+ */
+template<typename T>
+YamlResult<T> parseDecomposableFromYaml(YAML::Node const & node) {
+	T object;
+	if (auto error = parseDecomposableFromYaml<T>(node, object)) return std::move(*error);
+	return {estd::in_place_valid, std::move(object)};
+}
+
 }
 
 // Default conversion to YAML::Node.
@@ -136,8 +148,6 @@ struct estd::conversion<YAML::Node, dr::YamlResult<T>> {
 	static constexpr bool possible = dr::enable_yaml_conversion_with_decompose<T>::value;
 
 	static dr::YamlResult<T> perform(YAML::Node const & node) {
-		T result;
-		if (auto error = dr::parseDecomposableFromYaml(node, result)) return std::move(*error);
-		return std::move(result);
+		return dr::parseDecomposableFromYaml<T>(node);
 	}
 };
