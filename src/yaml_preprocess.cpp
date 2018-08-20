@@ -31,8 +31,8 @@ namespace {
 	};
 
 	void updateVariables(std::map<std::string, std::string> & variables, PathInfo const & path_info) {
-		variables["DIR"] = path_info.dir.empty() ? "." : fs::canonical(path_info.dir).native();
-		if (path_info.file) variables["FILE"] = fs::canonical(*path_info.file).native();
+		variables["DIR"] = path_info.dir.empty() ? "." : path_info.dir.lexically_normal().native();
+		if (path_info.file) variables["FILE"] = path_info.file->lexically_normal().native();
 		else variables.erase("FILE");
 	}
 

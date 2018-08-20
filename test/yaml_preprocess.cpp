@@ -78,13 +78,15 @@ TEST(YamlPreprocess, expand_file) {
 }
 
 TEST(YamlPreprocess, include) {
-	YAML::Node node = preprocessYamlFile(data_path + "/include.yaml", {}).value();
-	ASSERT_EQ(node["b"]["foo"].as<std::string>(), "bar");
+	auto node = preprocessYamlFile(data_path + "/include.yaml", {});
+	ASSERT_TRUE(node) << node.error_or().format();
+	ASSERT_EQ((*node)["b"]["foo"].as<std::string>(), "bar");
 }
 
 TEST(YamlPreprocess, include_recursive) {
-	YAML::Node node = preprocessYamlFile(data_path + "/recursive_include.yaml", {}).value();
-	ASSERT_EQ(node["a"]["b"]["foo"].as<std::string>(), "bar");
+	auto node = preprocessYamlFile(data_path + "/recursive_include.yaml", {});
+	ASSERT_TRUE(node) << node.error_or().format();
+	ASSERT_EQ((*node)["a"]["b"]["foo"].as<std::string>(), "bar");
 }
 
 }
