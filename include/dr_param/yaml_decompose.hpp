@@ -2,7 +2,6 @@
 #include "yaml.hpp"
 #include "decompose.hpp"
 
-#include <dr_error/error_or.hpp>
 #include <estd/convert/convert.hpp>
 #include <estd/tuple/for_each.hpp>
 #include <estd/tuple/tuple.hpp>

@@ -1,7 +1,6 @@
 #include "yaml.hpp"
 #include "yaml_preprocess.hpp"
 
-#include <dr_error/error_or.hpp>
 #include <dr_util/expand.hpp>
 
 #include <boost/filesystem.hpp>
@@ -37,12 +36,12 @@ namespace {
 		else variables.erase("FILE");
 	}
 
-	ErrorOr<void> includeFile(YAML::Node & node, std::vector<Work> & work, PathInfo const & path_info, std::map<std::string, std::string> const & variables) {
-		if (!node.IsScalar()) return DetailedError{std::errc::invalid_argument, "!include needs a string"};
+	estd::result<void, estd::error> includeFile(YAML::Node & node, std::vector<Work> & work, PathInfo const & path_info, std::map<std::string, std::string> const & variables) {
+		if (!node.IsScalar()) return estd::error{std::errc::invalid_argument, "!include needs a string"};
 
 		// Expand variables in path and normalize path.
 		boost::filesystem::path path = expandVariables(node.as<std::string>(), variables);
-		if (path.empty()) return DetailedError{std::errc::invalid_argument, "tried to include empty path"};
+		if (path.empty()) return estd::error{std::errc::invalid_argument, "tried to include empty path"};
 		if (path.is_relative()) path = path_info.dir / path;
 		path.normalize();
 
@@ -53,31 +52,31 @@ namespace {
 		// Queue node for reprocessing.
 		work.push_back(Work{PathInfo{path.parent_path(), path}, {node}});
 
-		return in_place_valid;
+		return estd::in_place_valid;
 	}
 
-	ErrorOr<void> expandVars(YAML::Node & node, std::map<std::string, std::string> const & variables) {
-		if (!node.IsScalar()) return DetailedError{std::errc::invalid_argument, "!expand needs a string"};
+	estd::result<void, estd::error> expandVars(YAML::Node & node, std::map<std::string, std::string> const & variables) {
+		if (!node.IsScalar()) return estd::error{std::errc::invalid_argument, "!expand needs a string"};
 		node.SetTag("");
 		node = expandVariables(node.as<std::string>(), variables);
-		return in_place_valid;
+		return estd::in_place_valid;
 	}
 
-	ErrorOr<bool> processSingle(YAML::Node & node, std::vector<Work> & work, PathInfo const & path_info, std::map<std::string, std::string> const & variables) {
+	estd::result<bool, estd::error> processSingle(YAML::Node & node, std::vector<Work> & work, PathInfo const & path_info, std::map<std::string, std::string> const & variables) {
 		if (node.Tag() == "!include") {
-			ErrorOr<void> result = includeFile(node, work, path_info, variables);
+			estd::result<void, estd::error> result = includeFile(node, work, path_info, variables);
 			if (!result) return result.error_unchecked();
 			return true;
 		}
 		if (node.Tag() == "!expand") {
-			ErrorOr<void> result = expandVars(node, variables);
+			estd::result<void, estd::error> result = expandVars(node, variables);
 			if (!result) return result.error_unchecked();
 			return true;
 		}
 		return false;
 	}
 
-	ErrorOr<void> processRecursive(YAML::Node & root, PathInfo const & path_info, std::map<std::string, std::string> variables) {
+	estd::result<void, estd::error> processRecursive(YAML::Node & root, PathInfo const & path_info, std::map<std::string, std::string> variables) {
 		std::vector<Work> work;
 		work.push_back(Work{path_info, {root}});
 
@@ -91,7 +90,7 @@ namespace {
 				current_work.nodes.pop_back();
 
 				// Tag handlers must queue processed (child) nodes themselves, possibly with different PathInfo.
-				ErrorOr<bool> changed = processSingle(node, work, current_work.path_info, variables);
+				estd::result<bool, estd::error> changed = processSingle(node, work, current_work.path_info, variables);
 				if (!changed) return changed.error_unchecked();
 				if (*changed) continue;
 
@@ -100,23 +99,23 @@ namespace {
 				if (node.IsSequence()) for (YAML::iterator i = node.begin(); i != node.end(); ++i) current_work.nodes.push_back(*i);
 			}
 		}
-		return in_place_valid;
+		return estd::in_place_valid;
 	}
 }
 
-ErrorOr<void> preprocessYamlWithFilePath(YAML::Node & root, std::string const & file, std::map<std::string, std::string> variables) {
+estd::result<void, estd::error> preprocessYamlWithFilePath(YAML::Node & root, std::string const & file, std::map<std::string, std::string> variables) {
 	return processRecursive(root, PathInfo::forFile(file), std::move(variables));
 }
 
-ErrorOr<void> preprocessYamlWithDirectoryPath(YAML::Node & root, std::string const & directory, std::map<std::string, std::string> variables) {
+estd::result<void, estd::error> preprocessYamlWithDirectoryPath(YAML::Node & root, std::string const & directory, std::map<std::string, std::string> variables) {
 	return processRecursive(root, PathInfo::forDirectory(directory), std::move(variables));
 }
 
-ErrorOr<YAML::Node> preprocessYamlFile(std::string const & path, std::map<std::string, std::string> variables) {
-	ErrorOr<YAML::Node> node = readYamlFile(path);
+estd::result<YAML::Node, estd::error> preprocessYamlFile(std::string const & path, std::map<std::string, std::string> variables) {
+	estd::result<YAML::Node, estd::error> node = readYamlFile(path);
 	if (!node) return node.error_unchecked();
 
-	ErrorOr<void> result = preprocessYamlWithFilePath(*node, path, std::move(variables));
+	estd::result<void, estd::error> result = preprocessYamlWithFilePath(*node, path, std::move(variables));
 	if (!result) return result.error_unchecked();
 
 	return *node;

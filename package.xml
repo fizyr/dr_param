@@ -10,7 +10,6 @@
 	<buildtool_depend>catkin</buildtool_depend>
 	<build_depend>fmt</build_depend>
 	<depend>estd</depend>
-	<depend>dr_error</depend>
 	<depend>dr_util</depend>
 	<depend>roscpp</depend>
 	<depend>yaml-cpp</depend>

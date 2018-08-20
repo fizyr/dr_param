@@ -1,5 +1,5 @@
 #pragma once
-#include <dr_error/error_or.hpp>
+#include <estd/result.hpp>
 
 #include <yaml-cpp/yaml.h>
 
@@ -8,17 +8,17 @@
 
 namespace dr {
 
-ErrorOr<YAML::Node> preprocessYamlFile(
+estd::result<YAML::Node, estd::error> preprocessYamlFile(
 	std::string const & path,
 	std::map<std::string, std::string> variables
 );
 
-ErrorOr<void> preprocessYamlWithFilePath(YAML::Node & root,
+estd::result<void, estd::error> preprocessYamlWithFilePath(YAML::Node & root,
 	std::string const & file,
 	std::map<std::string, std::string> variables
 );
 
-ErrorOr<void> preprocessYamlWithDirectoryPath(YAML::Node & root,
+estd::result<void, estd::error> preprocessYamlWithDirectoryPath(YAML::Node & root,
 	std::string const & directory,
 	std::map<std::string, std::string> variables
 );

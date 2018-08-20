@@ -93,11 +93,11 @@ std::optional<YamlError> expectScalar(YAML::Node const & node) {
 	return YamlError{fmt::format("invalid node type: expected scalar, got {}", toString(node.Type()))};
 }
 
-ErrorOr<YAML::Node> readYamlFile(std::string const & path) {
+estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	std::ifstream file(path);
 	if (!file.good()) {
 		int error = errno;
-		return DetailedError{{error, std::generic_category()}, path};
+		return estd::error{{error, std::system_category()}, path};
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();

@@ -8,7 +8,6 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 find_package(catkin REQUIRED COMPONENTS
 	estd
-	dr_error
 	dr_util
 	roscpp
 )
@@ -20,7 +19,7 @@ catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES ${PROJECT_NAME}
 	DEPENDS YAML_CPP
-	CATKIN_DEPENDS estd dr_error
+	CATKIN_DEPENDS estd
 )
 
 include_directories(include/${PROJECT_NAME})

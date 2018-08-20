@@ -1,9 +1,9 @@
 #pragma once
-#include <dr_error/error_or.hpp>
-
-#include <yaml-cpp/yaml.h>
+#include <estd/result.hpp>
 #include <estd/convert/convert.hpp>
 #include <estd/convert/traits.hpp>
+
+#include <yaml-cpp/yaml.h>
 
 #include <algorithm>
 #include <locale>
@@ -44,7 +44,7 @@ struct YamlError {
 
 /// Result type used by YAML parsing functions.
 template<typename T>
-using YamlResult = dr::result<T, YamlError>;
+using YamlResult = estd::result<T, YamlError>;
 
 /// Trait to check if a type can be converted from a YAML::Node.
 template<typename T>
@@ -81,17 +81,17 @@ void setIfExists(T & output, YAML::Node const & node, std::string const & key) {
 	if (node[key]) output = node[key].as<T>();
 }
 
-ErrorOr<YAML::Node> readYamlFile(std::string const & path);
+estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path);
 
 template<typename T>
-ErrorOr<T> convertChild(YAML::Node const & node, std::string const & key) {
-	if (!node[key]) return DetailedError{std::errc::invalid_argument, "no such key: " + key};
+estd::result<T, estd::error> convertChild(YAML::Node const & node, std::string const & key) {
+	if (!node[key]) return estd::error{std::errc::invalid_argument, "no such key: " + key};
 	try {
 		return node[key].as<T>();
 	} catch (std::system_error const & e) {
-		return DetailedError{e.code(), std::string{"failed to convert node: "} + e.what()};
+		return estd::error{e.code(), std::string{"failed to convert node: "} + e.what()};
 	} catch (std::exception const & e) {
-		return DetailedError{std::errc::invalid_argument, std::string{"failed to convert node: "} + e.what()};
+		return estd::error{std::errc::invalid_argument, std::string{"failed to convert node: "} + e.what()};
 	}
 }
 
