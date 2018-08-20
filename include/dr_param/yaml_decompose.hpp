@@ -120,27 +120,24 @@ std::optional<YamlError> parseDecomposableFromYaml(YAML::Node const & node, T & 
 
 }
 
-namespace estd {
-	// Default conversion to YAML::Node.
-	template<typename T>
-	struct conversion<T, YAML::Node> {
-		static constexpr bool impossible = !dr::enable_yaml_conversion_with_decompose<T>::value;
+// Default conversion to YAML::Node.
+template<typename T>
+struct estd::conversion<T, YAML::Node> {
+	static constexpr bool possible = dr::enable_yaml_conversion_with_decompose<T>::value;
 
-		static YAML::Node perform(T const & object) {
-			return dr::encodeDecomposableAsYaml(object);
-		}
-	};
+	static YAML::Node perform(T const & object) {
+		return dr::encodeDecomposableAsYaml(object);
+	}
+};
 
-	// Default conversion from YAML::Node.
-	template<typename T>
-	struct conversion<YAML::Node, dr::YamlResult<T>> {
-		static constexpr bool impossible = !dr::enable_yaml_conversion_with_decompose<T>::value;
+// Default conversion from YAML::Node.
+template<typename T>
+struct estd::conversion<YAML::Node, dr::YamlResult<T>> {
+	static constexpr bool possible = dr::enable_yaml_conversion_with_decompose<T>::value;
 
-		static dr::YamlResult<T> perform(YAML::Node const & node) {
-			T result;
-			if (auto error = dr::parseDecomposableFromYaml(node, result)) return std::move(*error);
-			return std::move(result);
-		}
-	};
-
-}
+	static dr::YamlResult<T> perform(YAML::Node const & node) {
+		T result;
+		if (auto error = dr::parseDecomposableFromYaml(node, result)) return std::move(*error);
+		return std::move(result);
+	}
+};

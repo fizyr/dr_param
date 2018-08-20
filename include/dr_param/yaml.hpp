@@ -101,7 +101,11 @@ namespace estd {
 
 #define DECLARE_YAML_CONVERSION(TYPE) template<> struct conversion<YAML::Node, dr::YamlResult<TYPE>> { \
 	static dr::YamlResult<TYPE> perform(YAML::Node const &) noexcept; \
+}; \
+template<> struct conversion<TYPE, YAML::Node> { \
+	static YAML::Node perform(TYPE) noexcept; \
 }
+
 
 DECLARE_YAML_CONVERSION(std::string);
 DECLARE_YAML_CONVERSION(bool);
