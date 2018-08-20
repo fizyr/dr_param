@@ -29,11 +29,11 @@ DR_PARAM_DEFINE_STRUCT_DECOMPOSITION(dr::Struct,
 	(a, "int", "", true)
 	(b, "int", "", true)
 	(c, "int", "", true)
-)
+);
 
 DR_PARAM_DEFINE_DECOMPOSITION(dr::Class,
 	("member", "int", "", true, [] (auto & v) { return &v.member();} )
-)
+);
 
 namespace dr {
 
