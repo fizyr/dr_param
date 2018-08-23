@@ -9,7 +9,7 @@
  *   DR_PARAM_DECLARE_YAML_DECODE(MyStruct);
  */
 #define DR_PARAM_DECLARE_YAML_DECODE(TYPE) template<> struct estd::conversion<::YAML::Node, ::dr::YamlResult<TYPE>> {\
-	static ::dr::YamlResult<TYPE> perform(::YAML::Node const &) noexcept; \
+	static ::dr::YamlResult<TYPE> perform(::YAML::Node const &); \
 }
 
 /// Declare a YAML encoding conversion.
@@ -20,7 +20,7 @@
  *   DR_PARAM_DECLARE_YAML_ENCODE(MyStruct);
  */
 #define DR_PARAM_DECLARE_YAML_ENCODE(TYPE) template<> struct estd::conversion<TYPE, ::YAML::Node> {\
-	static ::YAML::Node perform(TYPE const &) noexcept; \
+	static ::YAML::Node perform(TYPE const &); \
 }
 
 /// Declare a YAML decoding conversion.
@@ -40,7 +40,7 @@
  *     // convert value, return a YAML::Node
  *   }
  */
-#define DR_PARAM_DEFINE_YAML_ENCODE(TYPE, VALUE) ::YAML::Node estd::conversion<TYPE, YAML::Node>::perform(TYPE const & VALUE) noexcept
+#define DR_PARAM_DEFINE_YAML_ENCODE(TYPE, VALUE) ::YAML::Node estd::conversion<TYPE, YAML::Node>::perform(TYPE const & VALUE)
 
 /// Define a YAML decoding conversion.
 /**
@@ -52,7 +52,7 @@
  *     // Return a dr::YamlResult<MyStruct>
  *   }
  */
-#define DR_PARAM_DEFINE_YAML_DECODE(TYPE, NODE) ::dr::YamlResult<TYPE> estd::conversion<YAML::Node, ::dr::YamlResult<TYPE>>::perform(::YAML::Node const & NODE) noexcept
+#define DR_PARAM_DEFINE_YAML_DECODE(TYPE, NODE) ::dr::YamlResult<TYPE> estd::conversion<YAML::Node, ::dr::YamlResult<TYPE>>::perform(::YAML::Node const & NODE)
 
 /// Define a YAML decoding conversion.
 /**

@@ -100,14 +100,13 @@ estd::result<T, estd::error> convertChild(YAML::Node const & node, std::string c
 namespace estd {
 
 #define DECLARE_YAML_CONVERSION(TYPE) template<> struct conversion<YAML::Node, dr::YamlResult<TYPE>> { \
-	static dr::YamlResult<TYPE> perform(YAML::Node const &) noexcept; \
+	static dr::YamlResult<TYPE> perform(YAML::Node const &); \
 }; \
 template<> struct conversion<TYPE, YAML::Node> { \
-	static YAML::Node perform(TYPE) noexcept; \
+	static YAML::Node perform(TYPE); \
 }
 
 
-DECLARE_YAML_CONVERSION(std::string);
 DECLARE_YAML_CONVERSION(bool);
 DECLARE_YAML_CONVERSION(char);
 DECLARE_YAML_CONVERSION(short);
@@ -124,6 +123,14 @@ DECLARE_YAML_CONVERSION(double);
 DECLARE_YAML_CONVERSION(long double);
 
 #undef DECLARE_YAML_CONVERSION
+
+template<> struct conversion<std::string, YAML::Node> {
+	static YAML::Node perform(std::string const &);
+};
+
+template<> struct conversion<YAML::Node, dr::YamlResult<std::string>> {
+	static dr::YamlResult<std::string> perform(YAML::Node const &);
+};
 
 // conversion for std::array
 template<typename T, std::size_t N>

@@ -177,6 +177,10 @@ DR_PARAM_DEFINE_YAML_DECODE(std::string, node) {
 	return node.Scalar();
 }
 
+DR_PARAM_DEFINE_YAML_ENCODE(std::string, value) {
+	return YAML::Node(std::move(value));
+}
+
 DR_PARAM_DEFINE_YAML_DECODE(bool, node) {
 	if (auto error = expectScalar(node)) return *error;
 
@@ -188,7 +192,7 @@ DR_PARAM_DEFINE_YAML_DECODE(bool, node) {
 	return dr::YamlError{"invalid boolean value: " + node.Scalar()};
 }
 
-YAML::Node estd::conversion<bool, YAML::Node>::perform(bool value) noexcept { return YAML::Node(value); }
+YAML::Node estd::conversion<bool, YAML::Node>::perform(bool value) { return YAML::Node(value); }
 
 DR_PARAM_DEFINE_YAML_DECODE(char     , node) { return convert_signed_integral<char     >(node); }
 DR_PARAM_DEFINE_YAML_DECODE(short    , node) { return convert_signed_integral<short    >(node); }
@@ -206,18 +210,18 @@ DR_PARAM_DEFINE_YAML_DECODE(float      , node) { return convert_floating_point<f
 DR_PARAM_DEFINE_YAML_DECODE(double     , node) { return convert_floating_point<double>     (node); }
 DR_PARAM_DEFINE_YAML_DECODE(long double, node) { return convert_floating_point<long double>(node); }
 
-YAML::Node estd::conversion<char,      YAML::Node>::perform(char      value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<short,     YAML::Node>::perform(short     value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<int,       YAML::Node>::perform(int       value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<long,      YAML::Node>::perform(long      value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<long long, YAML::Node>::perform(long long value) noexcept { return YAML::Node(value); }
+YAML::Node estd::conversion<char,      YAML::Node>::perform(char      value) { return YAML::Node(value); }
+YAML::Node estd::conversion<short,     YAML::Node>::perform(short     value) { return YAML::Node(value); }
+YAML::Node estd::conversion<int,       YAML::Node>::perform(int       value) { return YAML::Node(value); }
+YAML::Node estd::conversion<long,      YAML::Node>::perform(long      value) { return YAML::Node(value); }
+YAML::Node estd::conversion<long long, YAML::Node>::perform(long long value) { return YAML::Node(value); }
 
-YAML::Node estd::conversion<unsigned char,      YAML::Node>::perform(unsigned char      value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<unsigned short,     YAML::Node>::perform(unsigned short     value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<unsigned int,       YAML::Node>::perform(unsigned int       value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<unsigned long,      YAML::Node>::perform(unsigned long      value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<unsigned long long, YAML::Node>::perform(unsigned long long value) noexcept { return YAML::Node(value); }
+YAML::Node estd::conversion<unsigned char,      YAML::Node>::perform(unsigned char      value) { return YAML::Node(value); }
+YAML::Node estd::conversion<unsigned short,     YAML::Node>::perform(unsigned short     value) { return YAML::Node(value); }
+YAML::Node estd::conversion<unsigned int,       YAML::Node>::perform(unsigned int       value) { return YAML::Node(value); }
+YAML::Node estd::conversion<unsigned long,      YAML::Node>::perform(unsigned long      value) { return YAML::Node(value); }
+YAML::Node estd::conversion<unsigned long long, YAML::Node>::perform(unsigned long long value) { return YAML::Node(value); }
 
-YAML::Node estd::conversion<float,       YAML::Node>::perform(float       value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<double,      YAML::Node>::perform(double      value) noexcept { return YAML::Node(value); }
-YAML::Node estd::conversion<long double, YAML::Node>::perform(long double value) noexcept { return YAML::Node(value); }
+YAML::Node estd::conversion<float,       YAML::Node>::perform(float       value) { return YAML::Node(value); }
+YAML::Node estd::conversion<double,      YAML::Node>::perform(double      value) { return YAML::Node(value); }
+YAML::Node estd::conversion<long double, YAML::Node>::perform(long double value) { return YAML::Node(value); }
