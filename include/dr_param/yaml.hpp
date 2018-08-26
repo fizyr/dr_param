@@ -154,6 +154,19 @@ struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
 	}
 };
 
+template<typename T, std::size_t N>
+struct conversion<std::array<T, N>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::array<T, N> const & data) noexcept {
+		YAML::Node result;
+		for (auto const & value : data) {
+			result.push_back(dr::encodeYaml(data));
+		}
+		return result;
+	}
+};
+
 // conversion for std::vector
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
@@ -174,6 +187,19 @@ struct conversion<YAML::Node, dr::YamlResult<std::vector<T>>> {
 			++index;
 		}
 
+		return result;
+	}
+};
+
+template<typename T>
+struct conversion<std::vector<T>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::vector<T> const & data) noexcept {
+		YAML::Node result;
+		for (auto const & value : data) {
+			result.push_back(dr::encodeYaml(data));
+		}
 		return result;
 	}
 };
@@ -212,13 +238,39 @@ struct conversion<YAML::Node, dr::YamlResult<std::map<std::string, T>>> {
 	}
 };
 
-// conversion for std::map<std::string, T>
+template<typename T>
+struct conversion<std::map<std::string, T>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::map<std::string, T> const & map) {
+		YAML::Node result;
+		for (auto & [key, value] : map) {
+			result[key] = encodeYaml(value);
+		}
+		return result;
+	}
+};
+
+// conversion for std::map<int, T>
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::map<int, T>>> {
 	static constexpr bool possible = dr::can_parse_yaml<T>;
 
 	static dr::YamlResult<std::map<int, T>> perform(YAML::Node const & node) {
 		return detail::parseYamlMap<int, T>(node);
+	}
+};
+
+template<typename T>
+struct conversion<std::map<int, T>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::map<int, T> const & map) {
+		YAML::Node result;
+		for (auto & [key, value] : map) {
+			result[std::to_string(key)] = encodeYaml(value);
+		}
+		return result;
 	}
 };
 
