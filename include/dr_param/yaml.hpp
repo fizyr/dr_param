@@ -161,7 +161,7 @@ struct conversion<std::array<T, N>, YAML::Node> {
 	static YAML::Node perform(std::array<T, N> const & data) noexcept {
 		YAML::Node result;
 		for (auto const & value : data) {
-			result.push_back(dr::encodeYaml(data));
+			result.push_back(dr::encodeYaml(value));
 		}
 		return result;
 	}
@@ -198,7 +198,7 @@ struct conversion<std::vector<T>, YAML::Node> {
 	static YAML::Node perform(std::vector<T> const & data) noexcept {
 		YAML::Node result;
 		for (auto const & value : data) {
-			result.push_back(dr::encodeYaml(data));
+			result.push_back(dr::encodeYaml(value));
 		}
 		return result;
 	}
