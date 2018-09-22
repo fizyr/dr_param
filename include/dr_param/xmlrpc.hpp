@@ -1,6 +1,6 @@
 #pragma once
 
-#include <XmlRpcValue.h>
+#include <xmlrpcpp/XmlRpcValue.h>
 
 #include <array>
 #include <string>
