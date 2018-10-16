@@ -132,6 +132,14 @@ template<> struct conversion<YAML::Node, dr::YamlResult<std::string>> {
 	static dr::YamlResult<std::string> perform(YAML::Node const &);
 };
 
+template<> struct conversion<std::string_view, YAML::Node> {
+	static YAML::Node perform(std::string_view const &);
+};
+
+template<> struct conversion<YAML::Node, dr::YamlResult<std::string_view>> {
+	static dr::YamlResult<std::string_view> perform(YAML::Node const &);
+};
+
 // conversion for std::array
 template<typename T, std::size_t N>
 struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {

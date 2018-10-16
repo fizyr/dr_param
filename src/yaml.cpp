@@ -181,6 +181,15 @@ DR_PARAM_DEFINE_YAML_ENCODE(std::string, value) {
 	return YAML::Node(std::move(value));
 }
 
+DR_PARAM_DEFINE_YAML_DECODE(std::string_view, node) {
+	if (auto error = expectScalar(node)) return *error;
+	return std::string_view{node.Scalar()};
+}
+
+DR_PARAM_DEFINE_YAML_ENCODE(std::string_view, value) {
+	return YAML::Node(std::string{value});
+}
+
 DR_PARAM_DEFINE_YAML_DECODE(bool, node) {
 	if (auto error = expectScalar(node)) return *error;
 
