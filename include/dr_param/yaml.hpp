@@ -150,7 +150,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
 
 		std::array<T, N> result;
 
-		int index = 0;
+		std::size_t index = 0;
 		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
 			if (index >= N) return dr::YamlError{"sequence too long, expected " + std::to_string(N) + ", now at index " + std::to_string(index)};
 			dr::YamlResult<T> element = dr::parseYaml<T>(*i);
@@ -209,6 +209,31 @@ struct conversion<std::vector<T>, YAML::Node> {
 			result.push_back(dr::encodeYaml(value));
 		}
 		return result;
+	}
+};
+
+// conversion for std::optional<T>
+template<typename T>
+struct conversion<YAML::Node, dr::YamlResult<std::optional<T>>> {
+	static constexpr bool possible = dr::can_parse_yaml<T>;
+
+	static dr::YamlResult<std::optional<T>> perform(YAML::Node const & node) {
+		if (node.IsNull()) return std::optional<T>{};
+
+		dr::YamlResult<T> element = dr::parseYaml<T>(node);
+		if (!element) return element.error();
+		return {estd::in_place_valid, std::optional<T>{std::move(*element)}};
+	}
+};
+
+template<typename T>
+struct conversion<std::optional<T>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::optional<T> const & data) noexcept {
+		// If the optional is false encode it as a boolean
+		if (!data) return YAML::Node();
+		return dr::encodeYaml(*data);
 	}
 };
 

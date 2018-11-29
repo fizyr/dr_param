@@ -11,12 +11,17 @@ namespace dr {
 
 TEST(YamlTest, array) {
 	std::array<int, 2> original{{1, 2}};
-	std::string encoded = YAML::Dump(YAML::Node{original});
-	std::array<int, 2> decoded = YAML::Load(encoded).as<std::array<int, 2>>();
-	ASSERT_EQ(decoded, original);
+	std::string encoded = YAML::Dump(encodeYaml(original));
+	YamlResult<std::array<int, 2>> decoded = parseYaml<std::array<int, 2>>(YAML::Load(encoded));
+	ASSERT_TRUE(decoded);
+	ASSERT_EQ(*decoded, original);
 
-	decoded = YAML::Load("[1, 2]").as<std::array<int, 2>>();
-	ASSERT_EQ(decoded, original);
+	decoded = parseYaml<std::array<int, 2>>(YAML::Load("[1, 2]"));
+	ASSERT_TRUE(decoded);
+	ASSERT_EQ(*decoded, original);
+
+	decoded = parseYaml<std::array<int, 2>>(YAML::Load("[1, 2, 3]"));
+	ASSERT_FALSE(decoded);
 }
 
 }
