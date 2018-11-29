@@ -47,6 +47,8 @@ if (CATKIN_ENABLE_TESTING)
 	target_link_libraries(${PROJECT_NAME}_test_yaml_decompose ${PROJECT_NAME})
 	catkin_add_gtest(${PROJECT_NAME}_test_yaml_preprocess test/yaml_preprocess.cpp)
 	target_link_libraries(${PROJECT_NAME}_test_yaml_preprocess ${PROJECT_NAME})
+	catkin_add_gtest(${PROJECT_NAME}_test_std_optional test/std_optional.cpp)
+	target_link_libraries(${PROJECT_NAME}_test_std_optional ${PROJECT_NAME})
 endif()
 
 install(TARGETS "${PROJECT_NAME}"

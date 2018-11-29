@@ -212,6 +212,37 @@ struct conversion<std::vector<T>, YAML::Node> {
 	}
 };
 
+// conversion for std::optional
+template<typename T>
+struct conversion<YAML::Node, dr::YamlResult<std::optional<T>>> {
+	static constexpr bool possible = dr::can_parse_yaml<T>;
+
+	static dr::YamlResult<std::optional<T>> perform(YAML::Node const & node) {
+		if (node.IsNull()) return std::optional<T>{};
+		if (auto error = dr::expectSequence(node)) return *error;
+
+		std::optional<T> result;
+
+		dr::YamlResult<T> element = dr::parseYaml<T>(node);
+		if (!element) return element.error();
+		result = *element;
+
+		return result;
+	}
+};
+
+template<typename T>
+struct conversion<std::optional<T>, YAML::Node> {
+	static constexpr bool possible = dr::can_encode_yaml<T>;
+
+	static YAML::Node perform(std::optional<T> const & data) noexcept {
+		YAML::Node result;
+		if (!data) return result;
+		result = dr::encodeYaml(data);
+		return result;
+	}
+};
+
 namespace detail {
 	// conversion for std::map<Key, Value>
 	template<typename Key, typename Value>
