@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
 namespace dr {
 
 TEST(YamlTest, optional) {
-	std::optional<int> original{{7}};
+	std::optional<int> original{7};
 	std::string encoded = YAML::Dump(encodeYaml(original));
 	YamlResult<std::optional<int>> decoded = parseYaml<std::optional<int>>(YAML::Load(encoded));
 	ASSERT_TRUE(decoded);
@@ -24,8 +24,8 @@ TEST(YamlTest, optional) {
 	decoded = parseYaml<std::optional<int>>(YAML::Load("[1, 2, 3]"));
 	ASSERT_FALSE(decoded);
 
-	std::optional<int> non_valid;
-	encoded = YAML::Dump(encodeYaml(non_valid));
+	std::optional<int> empty;
+	encoded = YAML::Dump(encodeYaml(empty));
 	decoded = parseYaml<std::optional<int>>(YAML::Load(encoded));
 	ASSERT_TRUE(decoded);
 	ASSERT_EQ(*decoded, non_valid);

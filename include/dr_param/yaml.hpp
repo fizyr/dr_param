@@ -220,9 +220,6 @@ struct conversion<YAML::Node, dr::YamlResult<std::optional<T>>> {
 	static dr::YamlResult<std::optional<T>> perform(YAML::Node const & node) {
 		if (node.IsNull()) return std::optional<T>{};
 
-		// If the optional is set to false it can be converted to bool
-		if (dr::parseYaml<bool>(node)) return std::optional<T>{};
-
 		std::optional<T> result;
 		dr::YamlResult<T> element = dr::parseYaml<T>(node);
 		if (!element) {
@@ -239,7 +236,7 @@ struct conversion<std::optional<T>, YAML::Node> {
 
 	static YAML::Node perform(std::optional<T> const & data) noexcept {
 		// If the optional is false encode it as a boolean
-		if (!data) return dr::encodeYaml(false);
+		if (!data) return YAML::Node();
 		return dr::encodeYaml(*data);
 	}
 };
