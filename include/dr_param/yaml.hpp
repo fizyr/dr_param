@@ -150,7 +150,7 @@ struct conversion<YAML::Node, dr::YamlResult<std::array<T, N>>> {
 
 		std::array<T, N> result;
 
-		int index = 0;
+		std::size_t index = 0;
 		for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
 			if (index >= N) return dr::YamlError{"sequence too long, expected " + std::to_string(N) + ", now at index " + std::to_string(index)};
 			dr::YamlResult<T> element = dr::parseYaml<T>(*i);
