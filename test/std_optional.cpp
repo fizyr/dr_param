@@ -28,7 +28,8 @@ TEST(YamlTest, optional) {
 	encoded = YAML::Dump(encodeYaml(empty));
 	decoded = parseYaml<std::optional<int>>(YAML::Load(encoded));
 	ASSERT_TRUE(decoded);
-	ASSERT_EQ(*decoded, non_valid);
+	ASSERT_FALSE(decoded->has_value());
+	ASSERT_EQ(*decoded, empty);
 }
 
 }

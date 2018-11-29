@@ -212,7 +212,7 @@ struct conversion<std::vector<T>, YAML::Node> {
 	}
 };
 
-// conversion for std::optional
+// conversion for std::optional<T>
 template<typename T>
 struct conversion<YAML::Node, dr::YamlResult<std::optional<T>>> {
 	static constexpr bool possible = dr::can_parse_yaml<T>;
@@ -220,13 +220,9 @@ struct conversion<YAML::Node, dr::YamlResult<std::optional<T>>> {
 	static dr::YamlResult<std::optional<T>> perform(YAML::Node const & node) {
 		if (node.IsNull()) return std::optional<T>{};
 
-		std::optional<T> result;
 		dr::YamlResult<T> element = dr::parseYaml<T>(node);
-		if (!element) {
-			return element.error();
-		}
-		result = *element;
-		return result;
+		if (!element) return element.error();
+		return {estd::in_place_valid, std::optional<T>{std::move(*element)}};
 	}
 };
 
