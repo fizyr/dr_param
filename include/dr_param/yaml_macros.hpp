@@ -1,6 +1,10 @@
 #pragma once
 #include "./yaml.hpp"
 
+/**
+ * This header contains macros to more easily declare and/or define YAML conversions.
+ */
+
 /// Declare a YAML decoding conversion.
 /**
  * This macro must be invoked from the global namespace.

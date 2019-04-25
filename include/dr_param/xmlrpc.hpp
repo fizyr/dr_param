@@ -6,6 +6,15 @@
 #include <string>
 #include <vector>
 
+/*
+ * This header contains utilities to convert complex structs to/from XMLRPC representation.
+ * It is mainly used by param.hpp to load parameters from the ROS parameter server.
+ *
+ * Use of this header is DEPRECATED.
+ * Using XMLRPC or the ROS parameter server is bad and should be avoided.
+ * Use something more sane like a YAML configuration file instead.
+ */
+
 namespace dr {
 
 /// Access an XmlRpc value as a boolean.
@@ -56,6 +65,7 @@ struct ConvertXmlRpc;
  * \return The loaded value.
  */
 template<typename T>
+[[deprecated]]
 T fromXmlRpc(
 	XmlRpc::XmlRpcValue const & value ///< The XmlRpcValue to load from.
 ) {
@@ -63,22 +73,27 @@ T fromXmlRpc(
 }
 
 template<>
+[[deprecated]]
 bool fromXmlRpc<bool>(XmlRpc::XmlRpcValue const & value);
 
 template<>
+[[deprecated]]
 int fromXmlRpc<int>(XmlRpc::XmlRpcValue const & value);
 
 template<>
+[[deprecated]]
 double fromXmlRpc<double>(XmlRpc::XmlRpcValue const & value);
 
 template<>
+[[deprecated]]
 float fromXmlRpc<float>(XmlRpc::XmlRpcValue const & value);
 
 template<>
+[[deprecated]]
 std::string fromXmlRpc<std::string>(XmlRpc::XmlRpcValue const & value);
 
 template<typename T>
-struct ConvertXmlRpc<std::vector<T>> {
+struct [[deprecated]] ConvertXmlRpc<std::vector<T>> {
 	static std::vector<T> convert(XmlRpc::XmlRpcValue const & value) {
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeArray, "vector");
 
@@ -94,7 +109,7 @@ struct ConvertXmlRpc<std::vector<T>> {
 };
 
 template<typename T>
-struct ConvertXmlRpc<std::map<std::string, T>> {
+struct [[deprecated]] ConvertXmlRpc<std::map<std::string, T>> {
 	static std::map<std::string, T> convert(XmlRpc::XmlRpcValue const & value) {
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeStruct, "map");
 
@@ -109,7 +124,7 @@ struct ConvertXmlRpc<std::map<std::string, T>> {
 };
 
 template<typename T, std::size_t N>
-struct ConvertXmlRpc<std::array<T, N>> {
+struct [[deprecated]] ConvertXmlRpc<std::array<T, N>> {
 	static std::array<T, N> convert(XmlRpc::XmlRpcValue const & value) {
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeArray, "array");
 		if (value.size() != N) throw std::runtime_error("Wrong size: " + std::to_string(value.size()) + " (expected " + std::to_string(N) + ")");

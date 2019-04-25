@@ -13,6 +13,12 @@
 #include <vector>
 #include <optional>
 
+/**
+ * This header implements YAML conversions for decomposable types (see decompose.hpp).
+ *
+ * It implements a YAML conversion that simply converts each member in turn.
+ */
+
 namespace dr {
 
 /// Marker to indicate if the default conversion from YAML::Node to YamlResult<T> should work by decomposition.

@@ -3,6 +3,14 @@
 
 #include <tuple>
 
+/*
+ * This header contains some horrible macro hacks to easily define struct decompositions for a given type.
+ *
+ * While macros are horrible, it reduces the required handwritten boilerplate,
+ * and it decouples the introspection details from the decomposition definitions.
+ */
+
+// These bits are here to implement looping over macro arguments.
 #define DR_PARAM_MEMBER_TUPLE_ENTRY_FIRST_END
 #define DR_PARAM_MEMBER_TUPLE_ENTRY1_END
 #define DR_PARAM_MEMBER_TUPLE_ENTRY2_END
@@ -39,6 +47,7 @@ template<> struct dr::param::Decomposition<T> { \
 	} \
 }
 
+// These bits are here to implement looping over macro arguments.
 #define DR_PARAM_MEMBER_TUPLE_STRUCT_ENTRY_FIRST_END
 #define DR_PARAM_MEMBER_TUPLE_STRUCT_ENTRY1_END
 #define DR_PARAM_MEMBER_TUPLE_STRUCT_ENTRY2_END
@@ -62,7 +71,7 @@ template<> struct dr::param::Decomposition<T> { \
  *
  * This macro defines a specialization for the struct dr::param::Decomposition<T>.
  *
- * Given a parenthesis enclosed group of argumentes (member, type, description, required),
+ * Given a parenthesis enclosed group of arguments (member, type, description, required),
  * each one is turned into a call to dr::param::memberInfo("member", type, description, required, &T::member).
  */
 #define DR_PARAM_DEFINE_STRUCT_DECOMPOSITION(T, MEMBERS) \

@@ -15,6 +15,14 @@
 
 #include <stdexcept>
 
+/*
+ * This header contains functions to read complex structures from the ROS parameter server.
+ *
+ * Use of this header is DEPRECATED.
+ * Using the ROS parameter server is bad and should be avoided.
+ * Use something more sane like a YAML configuration file instead.
+ */
+
 
 namespace dr {
 
@@ -26,6 +34,7 @@ namespace dr {
  * \return True if the parameter was found, false otherwise.
  */
 template<typename T>
+[[deprecated]]
 bool loadParam(
 	std::string const & key, ///< The key of the parameter to load.
 	T & result               ///<[out] Output variable for the result.
@@ -49,6 +58,7 @@ bool loadParam(
  * \return The loaded parameter.
  */
 template<typename T>
+[[deprecated]]
 T getParam(
 	std::string const & key ///< The key of the parameter to load.
 ) {
@@ -71,6 +81,7 @@ T getParam(
  * \return The loaded parameter or the fallback value if the parameter was not found.
  */
 template<typename T>
+[[deprecated]]
 T getParam(
 	std::string const & key, ///< The key of the parameter to load.
 	T const & fallback,      ///< The fallback value to return if the parameter can not be found.
@@ -92,22 +103,26 @@ T getParam(
 }
 
 template<typename T>
+[[deprecated]]
 bool loadParam(ros::NodeHandle const & node, std::string const & key, T & result) {
 	return loadParam(node.resolveName(key), result);
 }
 
 template<typename T>
+[[deprecated]]
 T getParam(ros::NodeHandle const & node, std::string const & key) {
 	return getParam<T>(node.resolveName(key));
 }
 
 template<typename T>
+[[deprecated]]
 T getParam(ros::NodeHandle const & node, std::string const & key, T const & fallback, bool warn = true) {
 	return getParam<T>(node.resolveName(key), fallback, warn);
 }
 
 /// Get a vector from the ROS parameter server.
 template<typename T>
+[[deprecated]]
 std::vector<T> getParamList(
 	ros::NodeHandle const & node, ///< The node handle to use for parameter name resolution.
 	std::string const & name      ///< The parameter to retrieve.
@@ -117,6 +132,7 @@ std::vector<T> getParamList(
 
 /// Get a vector from the ROS parameter server.
 template<typename T>
+[[deprecated]]
 std::vector<T> getParamList(
 	ros::NodeHandle const & node,    ///< The node handle to use for parameter name resolution.
 	std::string const & name,        ///< The parameter to retrieve.
@@ -128,6 +144,7 @@ std::vector<T> getParamList(
 
 /// Get an array from the ROS parameter server.
 template<typename T, std::size_t N>
+[[deprecated]]
 std::array<T, N> getParamArray(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name           ///< The parameter to retrieve.
@@ -137,6 +154,7 @@ std::array<T, N> getParamArray(
 
 /// Get an array from the ROS parameter server.
 template<typename T, std::size_t N>
+[[deprecated]]
 std::array<T, N> getParamArray(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name,          ///< The parameter to retrieve.
@@ -148,6 +166,7 @@ std::array<T, N> getParamArray(
 
 /// Get a map from the ROS parameter server.
 template<typename K, typename T>
+[[deprecated]]
 std::map<K, T> getParamMap(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name,          ///< The parameter to retrieve.
