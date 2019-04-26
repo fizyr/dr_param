@@ -11,6 +11,16 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * This header defines a system to convert complex structs to/from YAML representation.
+ *
+ * Note that yamlcpp already comes with a system like this,
+ * but that system has almost no error-reporting capabilities.
+ *
+ * This system is based on estd::convert and uses the YamlError type to expose more details,
+ * and in the end provide the user with better error messages.
+ */
+
 namespace dr {
 
 /// Description of a YAML node in a node tree.
@@ -68,22 +78,54 @@ YAML::Node encodeYaml(T const & value) {
 	return estd::convert<YAML::Node>(value);
 }
 
+/// Test if a node is a map, and if not, return a YamlError with a descriptive error message.
 std::optional<YamlError> expectMap(YAML::Node const & node);
+
+/// Test if a node is a map with a given size, and if not, return a YamlError with a descriptive error message.
 std::optional<YamlError> expectMap(YAML::Node const & node, std::size_t size);
+
+/// Test if a node is a sequence, and if not, return a YamlError with a descriptive error message.
 std::optional<YamlError> expectSequence(YAML::Node const & node);
+
+/// Test if a node is a sequence with a given size, and if not, return a YamlError with a descriptive error message.
 std::optional<YamlError> expectSequence(YAML::Node const & node, std::size_t size);
+
+/// Test if a node is a scalar, and if not, return a YamlError with a descriptive error message.
 std::optional<YamlError> expectScalar(YAML::Node const & node);
 
+/// Convert a node type to string.
+/**
+ * Used amongst others to report incorrect types in error messages.
+ */
 std::string toString(YAML::NodeType::value);
 
+/// Read a YAML file from a path.
+/**
+ * This should be preferred over YAML::LoadFile(...),
+ * because this function has much better error reporting.
+ */
+estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path);
+
+/// Set a variable to a subkey of a node if it exists.
+/**
+ * This function is deprecated and should not be used.
+ *
+ * Use the parseYaml(...) function instead.
+ */
 template<typename T>
+[[deprecated]]
 void setIfExists(T & output, YAML::Node const & node, std::string const & key) {
 	if (node[key]) output = node[key].as<T>();
 }
 
-estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path);
-
+/// Convert a child node to a given type with slightly better error message.
+/**
+ * This function is deprecated and should not be used.
+ *
+ * Use the parseYaml(...) function instead.
+ */
 template<typename T>
+[[deprecated]]
 estd::result<T, estd::error> convertChild(YAML::Node const & node, std::string const & key) {
 	if (!node[key]) return estd::error{std::errc::invalid_argument, "no such key: " + key};
 	try {
@@ -98,6 +140,11 @@ estd::result<T, estd::error> convertChild(YAML::Node const & node, std::string c
 }
 
 namespace estd {
+
+/**
+ * The bits here define basic conversion between common types and YAML nodes.
+ * That includes primitive types and containers from the standard library.
+ */
 
 #define DECLARE_YAML_CONVERSION(TYPE) template<> struct conversion<YAML::Node, dr::YamlResult<TYPE>> { \
 	static dr::YamlResult<TYPE> perform(YAML::Node const &); \

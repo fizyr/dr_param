@@ -3,15 +3,29 @@
 #include <type_traits>
 #include <utility>
 
+/*
+ * This header contains some utilities for limited introspection.
+ *
+ * It is used amongst others to implement automatically generated conversions to/from YAML.
+ */
+
 namespace dr::param {
 
 namespace detail {
+	/// Compile time check to see if a type is a std::reference_wrapper.
 	template<typename T>
 	struct is_reference_wrapper : std::false_type {};
 
 	template<typename T>
 	struct is_reference_wrapper<std::reference_wrapper<T>> : std::true_type {};
 
+	/// Get the raw reference type of dereferencing a T.
+	/**
+	 * While this is just T for normal references,
+	 * it's `T &` for pointers and std::reference_wrapper.
+	 *
+	 * Note that technically dereferencing something actually gives you a reference.
+	 */
 	template<typename T>
 	struct dereference_t {
 		using type = T;

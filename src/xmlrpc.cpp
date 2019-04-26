@@ -58,6 +58,7 @@ std::runtime_error makeXmlRpcTypeError(XmlRpc::XmlRpcValue::Type type, std::stri
 	return std::runtime_error("Cannot convert XmlRpc type " + xmlRpcTypeName(type) + " to " + target_type + ".");
 }
 
+[[deprecated]]
 void ensureXmlRpcType(XmlRpc::XmlRpcValue const & value, XmlRpc::XmlRpcValue::Type wanted, std::string const & target_type) {
 	if (value.getType() != wanted) throw makeXmlRpcTypeError(value.getType(), target_type);
 }
