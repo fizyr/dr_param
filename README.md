@@ -3,9 +3,9 @@ This library contains utilities for reading complex structs from YAML files.
 It also includes functions to perform simple preprocessing on YAML files.
 The preprocessing adds support for including other YAML files and parameter expansion in strings.
 
-The library uses `yamlcpp` for the `YAML::Node` type, so it's fully compatible with `yamlcpp`.
-However, some functions from `yamlcpp` have alternatives here with extended functionality and/or better error reporting.
-When available, you should prefer using functions from this library over functions from `yamlcpp`.
+The library uses `yaml-cpp` for the `YAML::Node` type, so it's fully compatible with `yaml-cpp`.
+However, some functions from `yaml-cpp` have alternatives here with extended functionality and/or better error reporting.
+When available, you should prefer using functions from this library over functions from `yaml-cpp`.
 
 For historical reasons, it still includes utilities for loading information from the ROS parameter server too, but these are deprecated.
 Using the ROS parameter server is considered harmful and should be avoided.
@@ -19,7 +19,7 @@ That way, more error details are preserved when reading or parsing the file fail
 
 It's also possible to perform some pre-processing when loading the file.
 For that, we can use `dr::preprocessYamlFile` and friends from `yaml_preprocess.hpp`.
-The preprocessing adds two two features to the YAML tree:
+The preprocessing adds two features to the YAML tree:
 it allows you to include other YAML files,
 and it can perform parameter expansion in string values.
 
@@ -110,7 +110,7 @@ Instead, it will tell you that it's missing a key with the correct spelling.
 A nuisance, but not the end of the world.
 
 More importantly though, it's quite a bit of work to implement this by hand.
-Especially when the struct is large, writing this code is tedious en error-prone.
+Especially when the struct is large, writing this code is tedious and error-prone.
 The potential for spelling mistakes and copy-paste errors would be very high.
 
 To alleviate this, these functions can be generated from a simpler definition: struct decompositions.
@@ -129,7 +129,7 @@ These decompositions could be used for other purposes as well,
 but we're mainly interested in using it to generate the YAML conversions for us.
 
 Basically, all we need to do is define a struct decomposition and include the right header.
-If we do that, we already get automaticly generated YAML conversions:
+If we do that, we already get automatically generated YAML conversions:
 
 ``cpp
 // This header contains the convenience macros to define struct decompositions.
@@ -188,7 +188,7 @@ These aren't tied to struct decompositions, but they'll still help us write less
 For example let's reimplement the example from the previous section,
 but this time we'll split the declarations and definitions.
 
-We start with the header container the declarations:
+We start with the header containing the declarations:
 ```cpp
 // This header defines macros to easily declare and define YAML conversions.
 #include <dr_param/yaml_macros.hpp>
@@ -205,7 +205,7 @@ struct Foo {
   Bar b;
 };
 
-// Now we use the macros to *delcare* (but not define) the YAML conversions.
+// Now we use the macros to *declare* (but not define) the YAML conversions.
 // Note: like the decomposition macros, these *must* be called from the global namespace.
 DR_PARAM_DECLARE_YAML_CONVERSION(Bar);
 DR_PARAM_DECLARE_YAML_CONVERSION(Foo);
@@ -234,7 +234,7 @@ However, we prefer our code to link fine as well, so let's also look at the matc
 #include "header.hpp"
 
 // Now we include decompose_macros.gpp and yaml_decompose.hpp.
-// This time we can polute the namespace just fine,
+// This time we don't need to worry about polutting the namespace,
 // because the effects are limited to this source file.
 #include <dr_param/decompose_macros.hpp>
 #include <dr_param/yaml_decompose.hpp>
