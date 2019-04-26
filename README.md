@@ -194,7 +194,8 @@ We start with the header containing the declarations:
 #include <dr_param/yaml_macros.hpp>
 
 // Note: we don't include any decomposition headers here.
-// That would just pollute the namespace uneccesarily.
+// That would just pollute the namespace uneccesarily with a bunch of template definitions
+// and magic features that the user of the header probably doesn't want to use.
 
 struct Bar {
   float baz;
@@ -234,7 +235,7 @@ However, we prefer our code to link fine as well, so let's also look at the matc
 #include "header.hpp"
 
 // Now we include decompose_macros.gpp and yaml_decompose.hpp.
-// This time we don't need to worry about polutting the namespace,
+// This time we don't need to worry about pollutting the namespace,
 // because the effects are limited to this source file.
 #include <dr_param/decompose_macros.hpp>
 #include <dr_param/yaml_decompose.hpp>
