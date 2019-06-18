@@ -39,16 +39,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} 
 add_definitions("-DTEST_DATA=${CMAKE_CURRENT_SOURCE_DIR}/test/data")
 
 if (CATKIN_ENABLE_TESTING)
-	catkin_add_gtest(${PROJECT_NAME}_test_xmlrpc test/xmlrpc.cpp)
-	target_link_libraries(${PROJECT_NAME}_test_xmlrpc ${PROJECT_NAME})
-	catkin_add_gtest(${PROJECT_NAME}_test_yaml test/yaml.cpp)
-	target_link_libraries(${PROJECT_NAME}_test_yaml ${PROJECT_NAME})
-	catkin_add_gtest(${PROJECT_NAME}_test_yaml_decompose test/yaml_decompose.cpp)
-	target_link_libraries(${PROJECT_NAME}_test_yaml_decompose ${PROJECT_NAME})
-	catkin_add_gtest(${PROJECT_NAME}_test_yaml_preprocess test/yaml_preprocess.cpp)
-	target_link_libraries(${PROJECT_NAME}_test_yaml_preprocess ${PROJECT_NAME})
-	catkin_add_gtest(${PROJECT_NAME}_test_std_optional test/std_optional.cpp)
-	target_link_libraries(${PROJECT_NAME}_test_std_optional ${PROJECT_NAME})
+	add_subdirectory(test)
 endif()
 
 install(TARGETS "${PROJECT_NAME}"

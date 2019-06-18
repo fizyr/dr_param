@@ -13,4 +13,5 @@
 	<depend>dr_util</depend>
 	<depend>roscpp</depend>
 	<depend>yaml-cpp</depend>
+	<depend>catch2</depend>
 </package>
