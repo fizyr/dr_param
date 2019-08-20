@@ -131,7 +131,7 @@ but we're mainly interested in using it to generate the YAML conversions for us.
 Basically, all we need to do is define a struct decomposition and include the right header.
 If we do that, we already get automatically generated YAML conversions:
 
-``cpp
+```cpp
 // This header contains the convenience macros to define struct decompositions.
 #include <dr_param/decompose_macros.hpp>
 
