@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 	roscpp
 )
 
+find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(fmt REQUIRED)
 
@@ -26,6 +27,7 @@ include_directories(include/${PROJECT_NAME})
 include_directories(SYSTEM
 	${catkin_INCLUDE_DIRS}
 	${YAML_CPP_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}
@@ -34,7 +36,12 @@ add_library(${PROJECT_NAME}
 	src/yaml_preprocess.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} fmt::fmt-header-only)
+target_link_libraries(${PROJECT_NAME}
+	${catkin_LIBRARIES}
+	${YAML_CPP_LIBRARIES}
+	${Boost_LIBRARIES}
+	fmt::fmt-header-only
+)
 
 add_definitions("-DTEST_DATA=${CMAKE_CURRENT_SOURCE_DIR}/test/data")
 
