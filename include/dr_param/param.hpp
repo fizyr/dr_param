@@ -34,11 +34,13 @@ namespace dr {
  * \return True if the parameter was found, false otherwise.
  */
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 bool loadParam(
 	std::string const & key, ///< The key of the parameter to load.
 	T & result               ///<[out] Output variable for the result.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	XmlRpc::XmlRpcValue value;
 	if (!ros::param::get(key, value)) return false;
 	try {
@@ -48,6 +50,7 @@ bool loadParam(
 	} catch (...) {
 		std::throw_with_nested(std::runtime_error("Failed to load parameter `" + key + "'"));
 	}
+#pragma GCC diagnostic pop
 }
 
 /// Get a parameter from the ROS parameter service.
@@ -58,10 +61,12 @@ bool loadParam(
  * \return The loaded parameter.
  */
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 T getParam(
 	std::string const & key ///< The key of the parameter to load.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	XmlRpc::XmlRpcValue value;
 	if (!ros::param::get(key, value)) throw std::runtime_error("ROS parameter not found: " + key);
 	try {
@@ -71,6 +76,7 @@ T getParam(
 	} catch (...) {
 		std::throw_with_nested(std::runtime_error("Failed to load parameter `" + key + "'"));
 	}
+#pragma GCC diagnostic pop
 }
 
 /// Get a parameter from the ROS parameter service or a fallback value.
@@ -81,12 +87,14 @@ T getParam(
  * \return The loaded parameter or the fallback value if the parameter was not found.
  */
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 T getParam(
 	std::string const & key, ///< The key of the parameter to load.
 	T const & fallback,      ///< The fallback value to return if the parameter can not be found.
 	bool warn = true         ///< If true, log a warning when the fallback default value is used.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	XmlRpc::XmlRpcValue value;
 	if (!ros::param::get(key, value)) {
 		if (warn) DR_PARAM_WARN("Failed to find ROS parameter: " << key << ". Using fallback value.");
@@ -100,80 +108,105 @@ T getParam(
 	} catch (...) {
 		std::throw_with_nested(std::runtime_error("Failed to load parameter `" + key + "'"));
 	}
+#pragma GCC diagnostic pop
 }
 
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 bool loadParam(ros::NodeHandle const & node, std::string const & key, T & result) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return loadParam(node.resolveName(key), result);
+#pragma GCC diagnostic pop
 }
 
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 T getParam(ros::NodeHandle const & node, std::string const & key) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<T>(node.resolveName(key));
+#pragma GCC diagnostic pop
 }
 
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 T getParam(ros::NodeHandle const & node, std::string const & key, T const & fallback, bool warn = true) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<T>(node.resolveName(key), fallback, warn);
+#pragma GCC diagnostic pop
 }
 
 /// Get a vector from the ROS parameter server.
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 std::vector<T> getParamList(
 	ros::NodeHandle const & node, ///< The node handle to use for parameter name resolution.
 	std::string const & name      ///< The parameter to retrieve.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<std::vector<T>>(node, name);
+#pragma GCC diagnostic pop
 }
 
 /// Get a vector from the ROS parameter server.
 template<typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 std::vector<T> getParamList(
 	ros::NodeHandle const & node,    ///< The node handle to use for parameter name resolution.
 	std::string const & name,        ///< The parameter to retrieve.
 	std::vector<T> const & fallback, ///< The fallback value to return if the parameter is not found.
 	bool warn = true                 ///< If true, log a warning when the parameter was not found.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<std::vector<T>>(node, name, fallback, warn);
+#pragma GCC diagnostic pop
 }
 
 /// Get an array from the ROS parameter server.
 template<typename T, std::size_t N>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 std::array<T, N> getParamArray(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name           ///< The parameter to retrieve.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<std::array<T, N>>(node, name);
+#pragma GCC diagnostic pop
 }
 
 /// Get an array from the ROS parameter server.
 template<typename T, std::size_t N>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 std::array<T, N> getParamArray(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name,          ///< The parameter to retrieve.
 	std::array<T, N> const & fallback, ///< The fallback value to return if the parameter is not found.
 	bool warn = true                   ///< If true, log a warning when the parameter was not found.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<std::array<T, N>>(node, name, fallback, warn);
+#pragma GCC diagnostic pop
 }
 
 /// Get a map from the ROS parameter server.
 template<typename K, typename T>
-[[deprecated]]
+[[deprecated("Using the ROS parameter server is a bad idead. Consider using something else.")]]
 std::map<K, T> getParamMap(
 	ros::NodeHandle const & node,      ///< The node handle to use for parameter name resolution.
 	std::string const & name,          ///< The parameter to retrieve.
 	std::map<K, T> const & fallback,   ///< The fallback value to return if the parameter is not found.
 	bool warn = true                   ///< If true, log a warning when the parameter was not found.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return getParam<std::map<K, T>>(node, name, fallback, warn);
+#pragma GCC diagnostic pop
 }
 
 }

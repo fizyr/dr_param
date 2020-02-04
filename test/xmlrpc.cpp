@@ -4,9 +4,11 @@
 /// Fizyr
 #include "xmlrpc.hpp"
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 namespace dr {
 
-TEST_CASE("XmlrpcTest 0", "ensureXmlRpcType") {    
+TEST_CASE("XmlrpcTest 0", "ensureXmlRpcType") {
 	XmlRpc::XmlRpcValue val_bool   = true;
 	XmlRpc::XmlRpcValue val_int    = 0;
 	XmlRpc::XmlRpcValue val_double = 3.14;
@@ -18,7 +20,7 @@ TEST_CASE("XmlrpcTest 0", "ensureXmlRpcType") {
 	XmlRpc::XmlRpcValue val_struct;
 	val_struct["klaatu"] = "barada nikto";
 
-  	REQUIRE_NOTHROW(ensureXmlRpcType(val_bool, XmlRpc::XmlRpcValue::TypeBoolean, ""));
+	REQUIRE_NOTHROW(ensureXmlRpcType(val_bool, XmlRpc::XmlRpcValue::TypeBoolean, ""));
 	REQUIRE_NOTHROW(ensureXmlRpcType(val_int, XmlRpc::XmlRpcValue::TypeInt, ""));
 	REQUIRE_NOTHROW(ensureXmlRpcType(val_double, XmlRpc::XmlRpcValue::TypeDouble, ""));
 	REQUIRE_NOTHROW(ensureXmlRpcType(val_string, XmlRpc::XmlRpcValue::TypeString, ""));

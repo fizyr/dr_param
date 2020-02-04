@@ -69,7 +69,10 @@ template<typename T>
 T fromXmlRpc(
 	XmlRpc::XmlRpcValue const & value ///< The XmlRpcValue to load from.
 ) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	return ConvertXmlRpc<T>::convert(value);
+#pragma GCC diagnostic pop
 }
 
 template<>
@@ -95,6 +98,8 @@ std::string fromXmlRpc<std::string>(XmlRpc::XmlRpcValue const & value);
 template<typename T>
 struct [[deprecated]] ConvertXmlRpc<std::vector<T>> {
 	static std::vector<T> convert(XmlRpc::XmlRpcValue const & value) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeArray, "vector");
 
 		std::vector<T> result;
@@ -105,12 +110,15 @@ struct [[deprecated]] ConvertXmlRpc<std::vector<T>> {
 		}
 
 		return result;
+#pragma GCC diagnostic pop
 	}
 };
 
 template<typename T>
 struct [[deprecated]] ConvertXmlRpc<std::map<std::string, T>> {
 	static std::map<std::string, T> convert(XmlRpc::XmlRpcValue const & value) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeStruct, "map");
 
 		std::map<std::string, T> result;
@@ -120,12 +128,15 @@ struct [[deprecated]] ConvertXmlRpc<std::map<std::string, T>> {
 		}
 
 		return result;
+#pragma GCC diagnostic pop
 	}
 };
 
 template<typename T, std::size_t N>
 struct [[deprecated]] ConvertXmlRpc<std::array<T, N>> {
 	static std::array<T, N> convert(XmlRpc::XmlRpcValue const & value) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		ensureXmlRpcType(value, XmlRpc::XmlRpcValue::TypeArray, "array");
 		if (value.size() != N) throw std::runtime_error("Wrong size: " + std::to_string(value.size()) + " (expected " + std::to_string(N) + ")");
 
@@ -135,6 +146,7 @@ struct [[deprecated]] ConvertXmlRpc<std::array<T, N>> {
 		}
 
 		return result;
+#pragma GCC diagnostic pop
 	}
 };
 
