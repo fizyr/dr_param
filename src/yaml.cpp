@@ -110,6 +110,7 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 using namespace dr;
 
 namespace {
+
 	template<typename T>
 	YamlResult<T> convert_signed_integral(YAML::Node const & node) {
 		if (auto error = expectScalar(node)) return *error;
@@ -170,6 +171,7 @@ namespace {
 		if (parsed != raw.size()) return YamlError{"invalid floating point value: " + raw};
 		return T(value);
 	}
+
 }
 
 DR_PARAM_DEFINE_YAML_DECODE(std::string, node) {
@@ -219,6 +221,8 @@ DR_PARAM_DEFINE_YAML_DECODE(float      , node) { return convert_floating_point<f
 DR_PARAM_DEFINE_YAML_DECODE(double     , node) { return convert_floating_point<double>     (node); }
 DR_PARAM_DEFINE_YAML_DECODE(long double, node) { return convert_floating_point<long double>(node); }
 
+DR_PARAM_DEFINE_YAML_DECODE(YAML::Node, node) { return node; }
+
 YAML::Node estd::conversion<char,      YAML::Node>::perform(char      value) { return YAML::Node(value); }
 YAML::Node estd::conversion<short,     YAML::Node>::perform(short     value) { return YAML::Node(value); }
 YAML::Node estd::conversion<int,       YAML::Node>::perform(int       value) { return YAML::Node(value); }
@@ -234,3 +238,5 @@ YAML::Node estd::conversion<unsigned long long, YAML::Node>::perform(unsigned lo
 YAML::Node estd::conversion<float,       YAML::Node>::perform(float       value) { return YAML::Node(value); }
 YAML::Node estd::conversion<double,      YAML::Node>::perform(double      value) { return YAML::Node(value); }
 YAML::Node estd::conversion<long double, YAML::Node>::perform(long double value) { return YAML::Node(value); }
+
+YAML::Node estd::conversion<YAML::Node, YAML::Node>::perform(YAML::Node value) { return value; }
