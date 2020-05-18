@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 /*
  * This header contains utilities to convert complex structs to/from XMLRPC representation.
