@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## master -
 ### Added
+- Add LICENSE file with Apache v2.0 license.
 
 ### Changed
 - Link with --as-needed.
