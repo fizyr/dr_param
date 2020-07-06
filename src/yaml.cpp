@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <fstream>
+#include <sstream>
 
 namespace dr {
 
