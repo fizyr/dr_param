@@ -326,7 +326,7 @@ struct conversion<std::map<std::string, T>, YAML::Node> {
 	static YAML::Node perform(std::map<std::string, T> const & map) {
 		YAML::Node result;
 		for (auto & [key, value] : map) {
-			result[key] = encodeYaml(value);
+			result[key] = dr::encodeYaml(value);
 		}
 		return result;
 	}
@@ -349,7 +349,7 @@ struct conversion<std::map<int, T>, YAML::Node> {
 	static YAML::Node perform(std::map<int, T> const & map) {
 		YAML::Node result;
 		for (auto & [key, value] : map) {
-			result[std::to_string(key)] = encodeYaml(value);
+			result[std::to_string(key)] = dr::encodeYaml(value);
 		}
 		return result;
 	}
