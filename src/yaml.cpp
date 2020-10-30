@@ -105,6 +105,34 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	return YAML::Load(buffer.str());
 }
 
+estd::result<void, estd::error> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b) {
+	// Check if the arguments are maps.
+	if (!map_a.IsMap() || !map_b.IsMap()) {
+		return estd::error{"invalid argument type"};
+	}
+
+	YAML::const_iterator iterator = map_b.begin();
+	while (iterator != map_b.end()) {
+		std::string key = iterator->first.as<std::string>();
+		YAML::Node value = iterator->second;
+		if (iterator->second.IsMap()) {
+			if (map_a[key]) {
+				auto merged = mergeYamlNodes(map_a[key], value);
+				if (!merged) {
+					return estd::error{"failed to overwrite map: ", merged.error().format()};
+				}
+			} else {
+				map_a[key] = value;
+			}
+		} else {
+			map_a[key] = value;
+		}
+		iterator++;
+	}
+	return estd::in_place_valid;
+}
+
+
 }
 
 // New style YAML conversions.
