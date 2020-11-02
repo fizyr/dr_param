@@ -3,6 +3,7 @@
 
 /// Fizyr
 #include "yaml.hpp"
+#include <estd/result/catch_string_conversions.hpp>
 
 namespace dr {
 
@@ -60,6 +61,36 @@ TEST_CASE("merge yaml nodes recursive", "[yaml_node]") {
 	REQUIRE(map_a["sub"]["list"].size() == 1);
 	REQUIRE(map_a["sub"]["list"][0].as<int>() == 5);
 	REQUIRE(map_a["sub"]["year"].as<int>() == 2019);
+}
+
+TEST_CASE("Merge into an empty YAML node", "[yaml_node]") {
+	YAML::Node a;
+
+	YAML::Node b;
+	b["aap"] = 1;
+	b["noot"] = 2;
+	b["mies"] = 3;
+
+	REQUIRE(mergeYamlNodes(a, b));
+
+	CHECK(a.size() == 3);
+	CHECK(a["aap"].as<int>() == 1);
+	CHECK(a["noot"].as<int>() == 2);
+	CHECK(a["mies"].as<int>() == 3);
+}
+
+TEST_CASE("Merge from an empty YAML node", "[yaml_node]") {
+	YAML::Node a;
+	a["aap"] = 1;
+	a["noot"] = 2;
+	a["mies"] = 3;
+
+	REQUIRE(mergeYamlNodes(a, YAML::Node{}));
+
+	CHECK(a.size() == 3);
+	CHECK(a["aap"].as<int>() == 1);
+	CHECK(a["noot"].as<int>() == 2);
+	CHECK(a["mies"].as<int>() == 3);
 }
 
 }
