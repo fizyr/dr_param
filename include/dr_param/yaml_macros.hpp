@@ -38,6 +38,8 @@
 /// Define a YAML encoding conversion.
 /**
  * This macro must be invoked from the global namespace.
+ * The conversion MUST already be declared in order to use this macro.
+ * That can be done using the DR_PARAM_DECLARE_YAML_ENCODE.
  *
  * Typical usage:
  *   DR_PARAM_DEFINE_YAML_ENCODE(MyStruct, value) {
@@ -49,6 +51,8 @@
 /// Define a YAML decoding conversion.
 /**
  * This macro must be invoked from the global namespace.
+ * The conversion MUST already be declared in order to use this macro.
+ * That can be done using the DR_PARAM_DECLARE_YAML_DECODE.
  *
  * Typical usage:
  *   DR_PARAM_DEFINE_YAML_DECODE(MyStruct, node) {
