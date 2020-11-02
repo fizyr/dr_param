@@ -105,29 +105,30 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	return YAML::Load(buffer.str());
 }
 
-estd::result<void, estd::error> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b) {
+YamlResult<void> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b) {
 	// Check if the arguments are maps.
-	if (!map_a.IsMap() || !map_b.IsMap()) {
-		return estd::error{"invalid argument type"};
+	if (!map_a.IsMap()) {
+		return YamlError{"to be overwritten node is not a map"};
+	}
+	if (!map_b.IsMap()) {
+		return YamlError{"overwriting node is not a map"};
 	}
 
-	YAML::const_iterator iterator = map_b.begin();
-	while (iterator != map_b.end()) {
+	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
 		std::string key = iterator->first.as<std::string>();
 		YAML::Node value = iterator->second;
-		if (iterator->second.IsMap()) {
-			if (map_a[key]) {
-				auto merged = mergeYamlNodes(map_a[key], value);
-				if (!merged) {
-					return estd::error{"failed to overwrite map: ", merged.error().format()};
-				}
-			} else {
-				map_a[key] = value;
+		if (iterator->second.IsMap() && map_a[key]) {
+			if (!map_a[key].IsMap()) {
+				return YamlError{"subnode is not a map"};
 			}
-		} else {
-			map_a[key] = value;
+			auto merged = mergeYamlNodes(map_a[key], value);
+			if (!merged) {
+				merged.error().appendTrace({iterator->first.as<std::string>(), "", YAML::NodeType::Map});
+				return merged;
+			}
+			continue;
 		}
-		iterator++;
+		map_a[key] = value;
 	}
 	return estd::in_place_valid;
 }
