@@ -106,6 +106,9 @@ std::string toString(YAML::NodeType::value);
  */
 estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path);
 
+/// Merge the nodes of map_b into map_a and overwrite if it already exists in map_a.
+YamlResult<void> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b);
+
 /// Set a variable to a subkey of a node if it exists.
 /**
  * This function is deprecated and should not be used.

@@ -38,4 +38,28 @@ TEST_CASE("yaml node conversions", "[yaml_node]") {
 	REQUIRE(decoded_string == string);
 }
 
+TEST_CASE("merge yaml nodes", "[yaml_node]") {
+	YAML::Node map_a = YAML::Load("{name: aap, list: [1 , 2, 3]}");
+	YAML::Node map_b = YAML::Load("{list: [5], movie: book}");
+
+	auto merged = mergeYamlNodes(map_a, map_b);
+	REQUIRE(merged);
+	REQUIRE(map_a["name"].as<std::string>() == "aap");
+	REQUIRE(map_a["list"].size() == 1);
+	REQUIRE(map_a["list"][0].as<int>() == 5);
+	REQUIRE(map_a["movie"].as<std::string>() == "book");
+}
+
+TEST_CASE("merge yaml nodes recursive", "[yaml_node]") {
+	YAML::Node map_a = YAML::Load("{name: aap, sub: {list: [1 , 2, 3], year: 2020}}");
+	YAML::Node map_b = YAML::Load("{sub: {list: [5], year: 2019}}");
+
+	auto merged = mergeYamlNodes(map_a, map_b);
+	REQUIRE(merged);
+	REQUIRE(map_a["name"].as<std::string>() == "aap");
+	REQUIRE(map_a["sub"]["list"].size() == 1);
+	REQUIRE(map_a["sub"]["list"][0].as<int>() == 5);
+	REQUIRE(map_a["sub"]["year"].as<int>() == 2019);
+}
+
 }

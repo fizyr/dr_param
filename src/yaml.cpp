@@ -105,6 +105,32 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	return YAML::Load(buffer.str());
 }
 
+YamlResult<void> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b) {
+	// Check if the arguments are maps.
+	if (!map_a.IsMap()) {
+		return YamlError{"tried to merge into a YAML node that is not a map"};
+	}
+	if (!map_b.IsMap()) {
+		return YamlError{"tried to merge from a YAML node that is not a map"};
+	}
+
+	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
+		std::string key = iterator->first.as<std::string>();
+		YAML::Node value = iterator->second;
+		if (value.IsMap() && map_a[key]) {
+			auto merged = mergeYamlNodes(map_a[key], value);
+			if (!merged) {
+				merged.error().appendTrace({key, "", YAML::NodeType::Map});
+				return merged;
+			}
+			continue;
+		}
+		map_a[key] = value;
+	}
+	return estd::in_place_valid;
+}
+
+
 }
 
 // New style YAML conversions.
