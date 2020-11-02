@@ -105,12 +105,12 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	return YAML::Load(buffer.str());
 }
 
-YamlResult<void> mergeYamlNodes(YAML::Node map_a, YAML::Node map_b) {
+YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
 	// Check if the arguments are maps.
-	if (!map_a.IsMap()) {
+	if (!map_a.IsMap() && !map_a.IsNull()) {
 		return YamlError{"tried to merge into a YAML node that is not a map"};
 	}
-	if (!map_b.IsMap()) {
+	if (!map_b.IsMap() && !map_b.IsNull()) {
 		return YamlError{"tried to merge from a YAML node that is not a map"};
 	}
 
