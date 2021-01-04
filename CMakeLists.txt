@@ -12,15 +12,15 @@ find_package(catkin REQUIRED COMPONENTS
 	dr_util
 )
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(yaml-cpp REQUIRED)
 find_package(fmt REQUIRED)
 
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES ${PROJECT_NAME}
-	DEPENDS YAML_CPP
-	CATKIN_DEPENDS estd
+	DEPENDS YAML_CPP Boost
+	CATKIN_DEPENDS estd dr_util
 )
 
 include_directories(include/${PROJECT_NAME})
