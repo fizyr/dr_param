@@ -10,7 +10,6 @@ add_link_options(LINKER:--as-needed)
 find_package(catkin REQUIRED COMPONENTS
 	estd
 	dr_util
-	roscpp
 )
 
 find_package(Boost REQUIRED)
@@ -32,7 +31,6 @@ include_directories(SYSTEM
 )
 
 add_library(${PROJECT_NAME}
-	src/xmlrpc.cpp
 	src/yaml.cpp
 	src/yaml_preprocess.cpp
 )

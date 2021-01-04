@@ -32,10 +32,9 @@ endfunction()
 
 declare_tests(dr_param_
 	"std_optional"
-    "xmlrpc"
 	"yaml"
-    "yaml_decompose"
-    "yaml_preprocess"
+	"yaml_decompose"
+	"yaml_preprocess"
 )
 
 get_property(check_target GLOBAL PROPERTY CHECK_TARGET)
