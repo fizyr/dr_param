@@ -265,7 +265,7 @@ DR_PARAM_DEFINE_YAML_DECODE(Bar, node) {
 }
 
 DR_PARAM_DEFINE_YAML_ENCODE(Bar, value) {
-  return dr::encodeDecomposableAsYaml(node);
+  return dr::encodeDecomposableAsYaml(value);
 }
 ```
 
