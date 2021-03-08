@@ -46,7 +46,7 @@
  *     // convert value, return a YAML::Node
  *   }
  */
-#define DR_PARAM_DEFINE_YAML_ENCODE(TYPE, VALUE) ::YAML::Node estd::conversion<TYPE, YAML::Node>::perform(TYPE const & VALUE)
+#define DR_PARAM_DEFINE_YAML_ENCODE(TYPE, VALUE) inline ::YAML::Node estd::conversion<TYPE, YAML::Node>::perform(TYPE const & VALUE)
 
 /// Define a YAML decoding conversion.
 /**
@@ -60,7 +60,7 @@
  *     // Return a dr::YamlResult<MyStruct>
  *   }
  */
-#define DR_PARAM_DEFINE_YAML_DECODE(TYPE, NODE) ::dr::YamlResult<TYPE> estd::conversion<YAML::Node, ::dr::YamlResult<TYPE>>::perform(::YAML::Node const & NODE)
+#define DR_PARAM_DEFINE_YAML_DECODE(TYPE, NODE) inline ::dr::YamlResult<TYPE> estd::conversion<YAML::Node, ::dr::YamlResult<TYPE>>::perform(::YAML::Node const & NODE)
 
 /// Define a YAML decoding conversion.
 /**
