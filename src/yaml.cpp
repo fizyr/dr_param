@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -126,6 +127,50 @@ YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
 			continue;
 		}
 		map_a[key] = value;
+	}
+	return estd::in_place_valid;
+}
+
+YamlResult<void> mergeNodes(YAML::Node & map_a, YAML::Node map_b) {
+	
+	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
+		std::string key = iterator->first.as<std::string>();
+		YAML::Node value = iterator->second;
+	    if (value.IsMap() && map_a[key]) {
+		
+			auto merged = mergeNodes(map_a[key], value);
+			if (!merged) {
+				merged.error().appendTrace({key, "", YAML::NodeType::Map});
+				return merged;
+			}
+			
+		}
+		// Check if the argument is a Sequence.
+		// Note: A Sequence of one key-value pair dictionaries represents an ordered dict.
+		if (value.IsSequence()) {
+			if (!map_a[key]) {
+				map_a[key] = value;
+			}
+			else {
+				for (std::size_t i = 0; i < map_a[key].size(); i++) {
+					for (std::size_t j = 0; j < value[j].size(); j++){
+						auto merged = mergeNodes(map_a[key][i], value[j]);
+						if (!merged) {
+							merged.error().appendTrace({key, "", YAML::NodeType::Map});
+							return merged;
+						}
+					}
+					
+				}
+				
+			}
+		
+		}
+		map_a[key] = value;	
+
+		
+
+
 	}
 	return estd::in_place_valid;
 }
