@@ -125,7 +125,7 @@ YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
 			if (!map_a[key]) {
 				map_a[key] = value;
 			}
-			else {
+			else if (map_a[key].Tag() == "!ordered_dict"){
 				for (std::size_t i = 0; i < value[i].size(); i++) {
 					for (std::size_t j = 0; j < map_a[key].size(); j++){
 						auto merged = mergeYamlNodes(map_a[key][j], value[i]);
@@ -137,6 +137,9 @@ YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
 					
 				}
 				
+			}
+			else {
+				return YamlError{fmt::format("{} in map_a is not an ordered dictionary", key)};
 			}
 		
 		}

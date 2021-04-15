@@ -40,7 +40,7 @@ TEST_CASE("yaml node conversions", "[yaml_node]") {
 }
 
 TEST_CASE("merge nodes recursive", "[yaml_node]") {
-	YAML::Node map_a = YAML::Load("{name: alpro, sub: {list: [1 , 2, 3], year: 2020}, l2: [{q: 1},{w: 4}], l3: [1,2,3]}");
+	YAML::Node map_a = YAML::Load("{name: alpro, sub: {list: [1 , 2, 3], year: 2020}, l2: !ordered_dict[{q: 1},{w: 4}], l3: [1,2,3]}");
 	YAML::Node map_b = YAML::Load("{name: oatly, sub: {list: [5], year: 2019}, l2: !ordered_dict [{q: 2}, {w: 5}, {a: 8}], l3: [4]}");
 	auto merged = mergeYamlNodes(map_a, map_b);
 	REQUIRE(merged);
