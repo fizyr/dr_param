@@ -152,9 +152,9 @@ YamlResult<void> mergeNodes(YAML::Node & map_a, YAML::Node map_b) {
 				map_a[key] = value;
 			}
 			else {
-				for (std::size_t i = 0; i < map_a[key].size(); i++) {
-					for (std::size_t j = 0; j < value[j].size(); j++){
-						auto merged = mergeNodes(map_a[key][i], value[j]);
+				for (std::size_t i = 0; i < value[i].size(); i++) {
+					for (std::size_t j = 0; j < map_a[key][j].size(); j++){
+						auto merged = mergeNodes(map_a[key][j], value[i]);
 						if (!merged) {
 							merged.error().appendTrace({key, "", YAML::NodeType::Map});
 							return merged;
