@@ -114,10 +114,6 @@ inline YamlResult<void> mergeYamlNodes(YAML::Node && map_a, YAML::Node map_b) {
 	return mergeYamlNodes(map_a, map_b);
 }
 
-YamlResult<void> mergeNodes(YAML::Node & map_a, YAML::Node map_b);
-
-inline YamlResult<void> mergeNodes(YAML::Node && map_a, YAML::Node map_b) {
-	return mergeNodes(map_a, map_b);
 }
 /// Set a variable to a subkey of a node if it exists.
 /**

@@ -107,54 +107,28 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 }
 
 YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
-	// Check if the arguments are maps.
-	if (!map_a.IsMap() && !map_a.IsNull()) {
-		return YamlError{"tried to merge into a YAML node that is not a map"};
-	}
-	if (!map_b.IsMap() && !map_b.IsNull()) {
-		return YamlError{"tried to merge from a YAML node that is not a map"};
-	}
-
 	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
-		std::string key = iterator->first.as<std::string>();
-		YAML::Node value = iterator->second;
-		if (value.IsMap() && map_a[key]) {
-			auto merged = mergeYamlNodes(map_a[key], value);
-			if (!merged) {
-				merged.error().appendTrace({key, "", YAML::NodeType::Map});
-				return merged;
-			}
-			continue;
-		}
-		map_a[key] = value;
-	}
-	return estd::in_place_valid;
-}
-
-YamlResult<void> mergeNodes(YAML::Node & map_a, YAML::Node map_b) {
-	
-	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
+		
 		std::string key = iterator->first.as<std::string>();
 		YAML::Node value = iterator->second;
 	    if (value.IsMap() && map_a[key]) {
 		
-			auto merged = mergeNodes(map_a[key], value);
+			auto merged = mergeYamlNodes(map_a[key], value);
 			if (!merged) {
 				merged.error().appendTrace({key, "", YAML::NodeType::Map});
 				return merged;
 			}
 			
 		}
-		// Check if the argument is a Sequence.
-		// Note: A Sequence of one key-value pair dictionaries represents an ordered dict.
-		if (value.IsSequence()) {
+		// Check the tag of the Node and go through the contents if it is an ordered dictionary.
+		if (value.Tag() == "!ordered_dict") {
 			if (!map_a[key]) {
 				map_a[key] = value;
 			}
 			else {
 				for (std::size_t i = 0; i < value[i].size(); i++) {
-					for (std::size_t j = 0; j < map_a[key][j].size(); j++){
-						auto merged = mergeNodes(map_a[key][j], value[i]);
+					for (std::size_t j = 0; j < map_a[key].size(); j++){
+						auto merged = mergeYamlNodes(map_a[key][j], value[i]);
 						if (!merged) {
 							merged.error().appendTrace({key, "", YAML::NodeType::Map});
 							return merged;
@@ -167,13 +141,10 @@ YamlResult<void> mergeNodes(YAML::Node & map_a, YAML::Node map_b) {
 		
 		}
 		map_a[key] = value;	
-
-		
-
-
 	}
 	return estd::in_place_valid;
 }
+
 
 
 }
