@@ -1,11 +1,8 @@
 #include "yaml.hpp"
 #include "yaml_macros.hpp"
-
 #include <fmt/format.h>
-
 #include <algorithm>
 #include <cerrno>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -106,48 +103,65 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	return YAML::Load(buffer.str());
 }
 
-YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
+// Merge Yaml Nodes (Type: Map).
+YamlResult<void> mergeYamlMaps(YAML::Node & map_a, YAML::Node map_b) {
 	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
-		
 		std::string key = iterator->first.as<std::string>();
 		YAML::Node value = iterator->second;
-	    if (value.IsMap() && map_a[key]) {
-		
-			auto merged = mergeYamlNodes(map_a[key], value);
+
+		if (value.IsMap() && map_a[key] && map_a[key].IsMap()) {
+			auto merged = mergeYamlMaps(map_a[key], value);
 			if (!merged) {
 				merged.error().appendTrace({key, "", YAML::NodeType::Map});
 				return merged;
 			}
-			
+			continue;
 		}
-		// Check the tag of the Node and go through the contents if it is an ordered dictionary.
-		if (value.Tag() == "!ordered_dict") {
-			if (!map_a[key]) {
-				map_a[key] = value;
+		else if (value.Tag() == "!ordered_dict" && map_a[key]) {
+			auto merged = mergeYamlOrderedDict(map_a[key], value);
+			if(!merged) {
+				merged.error().appendTrace({key, "", YAML::NodeType::Map});
+				return merged;
 			}
-			else if (map_a[key].Tag() == "!ordered_dict"){
-				for (std::size_t i = 0; i < value[i].size(); i++) {
-					for (std::size_t j = 0; j < map_a[key].size(); j++){
-						auto merged = mergeYamlNodes(map_a[key][j], value[i]);
-						if (!merged) {
-							merged.error().appendTrace({key, "", YAML::NodeType::Map});
-							return merged;
-						}
-					}
-					
-				}
-				
-			}
-			else {
-				return YamlError{fmt::format("{} in map_a is not an ordered dictionary", key)};
-			}
-		
+			continue;
 		}
-		map_a[key] = value;	
+		map_a[key] = value;
 	}
 	return estd::in_place_valid;
 }
 
+// Merge Yaml Nodes (Type: Ordered Dictionary).
+YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b) {
+	for (std::size_t i = 0; i < map_b.size(); i++) {
+		for (std::size_t j = 0; j < map_a.size(); j++){
+			if (map_b[i].IsMap()){
+				mergeYamlMaps(map_a[j], map_b[i]);
+			}
+			else {
+				return YamlError(fmt::format("{} is not a Map. Ordered dictionaries should be a collection of maps", map_b[i]));
+			}
+		}
+	}
+	return estd::in_place_valid;
+}
+
+// Merge Yaml Nodes.
+YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
+	if (map_b.IsMap()){
+		mergeYamlMaps(map_a, map_b);
+	}
+	else if (map_b.Tag() == "!ordered_dict") {
+		mergeYamlOrderedDict(map_a, map_b);
+	}
+	else if (map_b.IsNull()){
+		return estd::in_place_valid;
+	}
+	else {
+		return YamlError("map_b is neither a Map nor an Ordered dictionary");
+	}
+	return estd::in_place_valid;
+
+}
 
 
 }

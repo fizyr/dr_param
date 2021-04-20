@@ -39,20 +39,36 @@ TEST_CASE("yaml node conversions", "[yaml_node]") {
 	REQUIRE(decoded_string == string);
 }
 
-TEST_CASE("merge nodes recursive", "[yaml_node]") {
-	YAML::Node map_a = YAML::Load("{name: alpro, sub: {list: [1 , 2, 3], year: 2020}, l2: !ordered_dict[{q: 1},{w: 4}], l3: [1,2,3]}");
-	YAML::Node map_b = YAML::Load("{name: oatly, sub: {list: [5], year: 2019}, l2: !ordered_dict [{q: 2}, {w: 5}, {a: 8}], l3: [4]}");
-	auto merged = mergeYamlNodes(map_a, map_b);
-	REQUIRE(merged);
-	REQUIRE(map_a["name"].as<std::string>() == "oatly");
+TEST_CASE("merge yaml nodes", "[yaml_node]") {
+	YAML::Node map_a = YAML::Load("{name: aap, sub: {list: [1 , 2, 3], year: 2020}}");
+	YAML::Node map_b = YAML::Load("{sub: {list: [5], year: 2019}}");
+
+	mergeYamlNodes(map_a, map_b);
+	REQUIRE(map_a["name"].as<std::string>() == "aap");
 	REQUIRE(map_a["sub"]["list"].size() == 1);
 	REQUIRE(map_a["sub"]["list"][0].as<int>() == 5);
 	REQUIRE(map_a["sub"]["year"].as<int>() == 2019);
-	REQUIRE(map_a["l2"][0]["q"].as<int>()  == 2);
-	REQUIRE(map_a["l2"][1]["w"].as<int>()  == 5);
-	REQUIRE(map_a["l2"][2]["a"].as<int>()  == 8);
-	REQUIRE(map_a["l3"][0].as<int>()  == 4);
+}
+
+TEST_CASE("merge yaml nodes ordered dictionary", "[yaml_node]") {
+	YAML::Node map_a = YAML::Load("{list : !ordered_dict[{a10: one}, {a11: one, a12: twelve}]}");
+	YAML::Node map_b = YAML::Load("{list: !ordered_dict[{a10: ten},{a11: eleven, a13: thirteen}]}");
 	
+	mergeYamlNodes(map_a, map_b);
+	REQUIRE(map_a["list"][0]["a10"].as<std::string>() == "ten");
+	REQUIRE(map_a["list"][1]["a11"].as<std::string>() == "eleven");
+	REQUIRE(map_a["list"][1]["a12"].as<std::string>() == "twelve");
+	REQUIRE(map_a["list"][1]["a13"].as<std::string>() == "thirteen");
+}
+
+TEST_CASE("merge yaml nodes ordered dictionary nested", "[yaml_node]") {
+	YAML::Node map_a = YAML::Load("{list : !ordered_dict[{a10: one}, {a11: one, a12: twelve}]}");
+	YAML::Node map_b = YAML::Load("{list: !ordered_dict[{a10: ten},{a11: {a13: thirteen}}]}");
+	
+	mergeYamlNodes(map_a, map_b);
+	REQUIRE(map_a["list"][0]["a10"].as<std::string>() == "ten");
+	REQUIRE(map_a["list"][1]["a11"]["a13"].as<std::string>() == "thirteen");
+	REQUIRE(map_a["list"][1]["a12"].as<std::string>() == "twelve");
 }
 
 TEST_CASE("Merge into an empty YAML node", "[yaml_node]") {
