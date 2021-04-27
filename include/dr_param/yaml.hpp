@@ -106,24 +106,9 @@ std::string toString(YAML::NodeType::value);
  */
 estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path);
 
-/// Merge the nodes of map_b into map_a and overwrite if it already exists in map_a.
+/// Merge Yaml Node b to a.
 YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b);
 
-/// Merge Yaml Nodes of type Ordered Dictionary, i.e., sequence on Maps.
-YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b);
-
-inline YamlResult<void> mergeYamlOrderedDict(YAML::Node && map_a, YAML::Node map_b) {
-	return mergeYamlOrderedDict(map_a, map_b);
-}
-
-/// Merge Yaml Nodes of type Map , i.e., a key-value pair.
-YamlResult<void> mergeYamlMaps(YAML::Node & map_a, YAML::Node map_b);
-
-inline YamlResult<void> mergeYamlMaps(YAML::Node && map_a, YAML::Node map_b) {
-	return mergeYamlMaps(map_a, map_b);
-}
-
-}
 /// Set a variable to a subkey of a node if it exists.
 /**
  * This function is deprecated and should not be used.

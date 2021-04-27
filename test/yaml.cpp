@@ -50,25 +50,15 @@ TEST_CASE("merge yaml nodes", "[yaml_node]") {
 	REQUIRE(map_a["sub"]["year"].as<int>() == 2019);
 }
 
-TEST_CASE("merge yaml nodes ordered dictionary", "[yaml_node]") {
-	YAML::Node map_a = YAML::Load("{list : !ordered_dict[{a10: one}, {a11: one, a12: twelve}]}");
-	YAML::Node map_b = YAML::Load("{list: !ordered_dict[{a10: ten},{a11: eleven, a13: thirteen}]}");
-	
-	mergeYamlNodes(map_a, map_b);
-	REQUIRE(map_a["list"][0]["a10"].as<std::string>() == "ten");
-	REQUIRE(map_a["list"][1]["a11"].as<std::string>() == "eleven");
-	REQUIRE(map_a["list"][1]["a12"].as<std::string>() == "twelve");
-	REQUIRE(map_a["list"][1]["a13"].as<std::string>() == "thirteen");
-}
 
 TEST_CASE("merge yaml nodes ordered dictionary nested", "[yaml_node]") {
-	YAML::Node map_a = YAML::Load("{list : !ordered_dict[{a10: one}, {a11: one, a12: twelve}]}");
-	YAML::Node map_b = YAML::Load("{list: !ordered_dict[{a10: ten},{a11: {a13: thirteen}}]}");
+	YAML::Node map_a = YAML::Load("{list : !ordered_dict[{a10: one}, {a11: one}, {a13: thirteen}]}");
+	YAML::Node map_b = YAML::Load("{list: !ordered_dict[{a10: ten},{a11: {a15: fifteen}}, {a14: fourteen}]}");
 	
 	mergeYamlNodes(map_a, map_b);
 	REQUIRE(map_a["list"][0]["a10"].as<std::string>() == "ten");
-	REQUIRE(map_a["list"][1]["a11"]["a13"].as<std::string>() == "thirteen");
-	REQUIRE(map_a["list"][1]["a12"].as<std::string>() == "twelve");
+	REQUIRE(map_a["list"][1]["a11"]["a15"].as<std::string>() == "fifteen");
+	REQUIRE(map_a["list"][3]["a14"].as<std::string>() == "fourteen");
 }
 
 TEST_CASE("Merge into an empty YAML node", "[yaml_node]") {

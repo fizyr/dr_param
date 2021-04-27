@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+
 namespace dr {
 
 using namespace std::string_literals;
@@ -102,63 +103,105 @@ estd::result<YAML::Node, estd::error> readYamlFile(std::string const & path) {
 	buffer << file.rdbuf();
 	return YAML::Load(buffer.str());
 }
+// Merge Yaml Nodes of type Ordered Dictionary, i.e., sequence on Maps.
+YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b);
+
+inline YamlResult<void> mergeYamlOrderedDict(YAML::Node && map_a, YAML::Node map_b) {
+ 	return mergeYamlOrderedDict(map_a, map_b);
+ }
+
+// Merge Yaml Nodes of type Map , i.e., a key-value pair.
+YamlResult<void> mergeYamlMaps(YAML::Node & map_a, YAML::Node map_b);
+
+inline YamlResult<void> mergeYamlMaps(YAML::Node && map_a, YAML::Node map_b) {
+ 	return mergeYamlMaps(map_a, map_b);
+  }
+
 
 // Merge Yaml Nodes (Type: Map).
 YamlResult<void> mergeYamlMaps(YAML::Node & map_a, YAML::Node map_b) {
-	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
-		std::string key = iterator->first.as<std::string>();
-		YAML::Node value = iterator->second;
-
-		if (value.IsMap() && map_a[key] && map_a[key].IsMap()) {
-			auto merged = mergeYamlMaps(map_a[key], value);
-			if (!merged) {
-				merged.error().appendTrace({key, "", YAML::NodeType::Map});
-				return merged;
+	if (map_b.IsMap()){
+		for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
+			std::string key = iterator->first.as<std::string>();
+			YAML::Node value = iterator->second;
+			if (map_a[key] && map_a[key].IsMap()) {
+				auto merged = mergeYamlMaps(map_a[key], value);
+				if (!merged) {
+					merged.error().appendTrace({key, "", YAML::NodeType::Map});
+					return merged;
+				}
 			}
-			continue;
-		}
-		else if (value.Tag() == "!ordered_dict" && map_a[key]) {
-			auto merged = mergeYamlOrderedDict(map_a[key], value);
-			if(!merged) {
-				merged.error().appendTrace({key, "", YAML::NodeType::Map});
-				return merged;
+			else if (value.Tag() == "!ordered_dict"  && map_a[key].Tag() == "!ordered_dict" && map_a[key]) {
+				auto merged = mergeYamlOrderedDict(map_a[key], value);
+				if (!merged) {
+					merged.error().appendTrace({key, "", YAML::NodeType::Map});
+					return merged;
+				}
 			}
-			continue;
+			else {
+			map_a[key] = value;
+			}
 		}
-		map_a[key] = value;
 	}
 	return estd::in_place_valid;
 }
 
 // Merge Yaml Nodes (Type: Ordered Dictionary).
 YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b) {
-	for (std::size_t i = 0; i < map_b.size(); i++) {
-		for (std::size_t j = 0; j < map_a.size(); j++){
-			if (map_b[i].IsMap()){
-				mergeYamlMaps(map_a[j], map_b[i]);
-			}
-			else {
-				return YamlError(fmt::format("{} is not a Map. Ordered dictionaries should be a collection of maps", map_b[i]));
-			}
+	std::size_t i = 0;
+	std::size_t j = 0;
+	std::size_t a_pointer = 0;
+	std::size_t b_pointer = 0;
+	while (i < map_b.size()){
+		if(!map_b[i].IsMap() || map_b[i].size() > 1){
+			return YamlError("Ordered dictionary should only contain single item map");
 		}
-	}
+		j = a_pointer;
+		while (j < map_a.size()){
+			i = b_pointer;
+			if (!map_a[j].IsMap() || map_a[j].size() > 1){
+				return YamlError("Ordered dictionary should only contain single item map");
+			}
+			for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++) {
+				std::string key = iterator->first.as<std::string>();
+				YAML::Node value = iterator->second;
+				if (map_a[j][key]){ 
+					a_pointer++;
+					b_pointer++;
+					mergeYamlMaps(map_a[j], map_b[i]);
+				}
+				else {
+					map_a.push_back(map_b[i]);
+				}
+			}
+			j++;
+			}
+		i++;	
+		}
 	return estd::in_place_valid;
 }
 
 // Merge Yaml Nodes.
 YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
-	if (map_b.IsMap()){
+	if (!map_a.IsMap() && map_a.Tag() != "!ordered_dict" && !map_a.IsNull()) {
+		return YamlError{"tried to merge into a YAML node that is neither a map nor an ordered dictionary"};
+	}
+	else if (!map_b.IsMap() && map_b.Tag() != "!ordered_dict" && !map_b.IsNull()) {
+		return YamlError{"tried to merge from a YAML node that is neither a map nor an ordered dictionary"};
+	}
+	else if (map_a.IsNull() && !map_b.IsNull()){
+		map_a = map_b;
+	}
+	else if (map_b.IsNull() && !map_a.IsNull()) {
+		return estd::in_place_valid;
+	} 
+	else if (map_a.IsMap()){
 		mergeYamlMaps(map_a, map_b);
 	}
-	else if (map_b.Tag() == "!ordered_dict") {
+	else if (map_a.Tag() == "!ordered_dict") {
 		mergeYamlOrderedDict(map_a, map_b);
 	}
-	else if (map_b.IsNull()){
-		return estd::in_place_valid;
-	}
-	else {
-		return YamlError("map_b is neither a Map nor an Ordered dictionary");
-	}
+
 	return estd::in_place_valid;
 
 }
