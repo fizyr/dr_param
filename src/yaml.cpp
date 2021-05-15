@@ -146,50 +146,47 @@ YamlResult<void> mergeYamlMaps(YAML::Node & map_a, YAML::Node map_b) {
 	return estd::in_place_valid;
 }
 
-// Merge Yaml Nodes (Type: Ordered Dictionary).
-YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b) {
-	// Index pointing at map_b.
-	std::size_t b_index = 0;
-	// Index pointing at map_a.
-	std::size_t a_index = 0;
-	// index used as the starting point for iteration over map_a elements.
-	std::size_t a_start = 0;
-	// Index used as the starting point for iteration over map_b elements.
-	std::size_t b_start = 0;
-	
-	while (b_index < map_b.size()){
-		// If element inside the ordered dictionary is not a map or it contains more than one key-value pair, return Error.
-		if(!map_b[b_index].IsMap() || map_b[b_index].size() > 1){
+// Uitility function to check whether a value is present in a vector.
+bool Contains(const std::vector<int> &list, int x)
+{
+	return std::find(list.begin(), list.end(), x) != list.end();
+}
+
+
+// Merge Ordered dictionaries.
+YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
+	// Vector containing all the indexes of b which are present in a.
+	std::vector<int> checked;
+	// Booolean to determine whether the element in b is present in a or not.
+	bool found = false;
+	for (std::size_t i = 0; i < map_b.size(); i++) {
+		found = false;
+		// Check whether the element in b is a single key-value pair.
+		if (!map_b[i].IsMap() || map_b[i].size() > 1){
 			return YamlError("Ordered dictionary should only contain single item map");
 		}
-		// Set the starting point for map_a iteration.
-		a_index = a_start;
-		while (a_index < map_a.size()){
-			// Set starting point for map_b iteration.
-			b_index = b_start;
-			// If element inside the ordered dictionary is not a map or it contains more than one key-value pair, return Error.
-			if (!map_a[a_index].IsMap() || map_a[a_index].size() > 1){
+		for (std::size_t j = 0; j < map_a.size(); j++){
+			// Check whether the element in a is a single key-value pair.
+			if (!map_a[j].IsMap() || map_a[j].size() > 1){
 				return YamlError("Ordered dictionary should only contain single item map");
 			}
-			// Get key-value from map_b element and check if the key is present in map_a.
-			for (YAML::const_iterator iterator = map_b[b_index].begin(); iterator != map_b[b_index].end(); iterator++) {
+			for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++) {
 				std::string key = iterator->first.as<std::string>();
 				YAML::Node value = iterator->second;
-				// If the key is present, update map_a element with the new value from map_b and update the starting point of iteration for both map_a and map_b.
-				if (map_a[a_index][key]){ 
-					a_start++;
-					b_start++;
-					mergeYamlMaps(map_a[a_index], map_b[b_index]);
-				}
-				// If key is not present in map_a, i.e., it is a new element, push the new element to map_a.
-				else {
-					map_a.push_back(map_b[b_index]);
+				if (map_a[j][key] && !Contains(checked, j)){
+					mergeYamlMaps(map_a[j], map_b[i]);
+					checked.push_back(j);
+					found = true;
+					break;
 				}
 			}
-			a_index++;
-			}
-		b_index++;	
+			
 		}
+		// If element in b is not present in a, push the new element to a.
+		if (!found){
+				map_a.push_back(map_b[i]);
+		}
+	}	
 	return estd::in_place_valid;
 }
 
