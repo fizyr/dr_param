@@ -152,17 +152,14 @@ bool Contains(const std::vector<int> &list, int x){
 }
 
 // Utility function to check whether key in map_b is present in map_a.
-bool orderedDictFind(YAML::Node map_a, YAML::Node map_b, std::vector<int> & checked, int index){
-	for (YAML::const_iterator iterator = map_b.begin(); iterator != map_b.end(); iterator++) {
-		std::string key = iterator->first.as<std::string>();
-		if (map_a[key] && !Contains(checked, index)){
+bool orderedDictFind(YAML::Node map_a, std::string const & key){
+	if (map_a[key]){
 			return true;
-		}
-	}
-	 
+		} 
 	return false;
 }
 
+// Merge Yaml ordered dictionary.
 YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
 	// Vector containing all the indexes of b which are present in a.
 	std::vector<int> checked;
@@ -180,11 +177,14 @@ YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
 			if (!map_a[j].IsMap() || map_a[j].size() > 1){
 				return YamlError("Ordered dictionary should only contain single item map");
 			}
-			if (orderedDictFind(map_a[j], map_b[i], checked, j)){
-				mergeYamlMaps(map_a[j], map_b[i]);
-				checked.push_back(j);
-				found = true;
-				break;
+			for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++) {
+				std::string key = iterator->first.as<std::string>();
+				if (orderedDictFind(map_a[j], key) && !Contains(checked, j)){
+					mergeYamlMaps(map_a[j], map_b[i]);
+					checked.push_back(j);
+					found = true;
+					break;
+				}
 			}
 			
 		}
