@@ -172,6 +172,11 @@ std::optional<std::size_t> orderedDictFind(YAML::Node map_a, std::string const &
 
 // Merge ordered dictionaries.
 YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
+	// Check if map_b is a list which is the first criteria for an ordered dictionary.
+	if (!map_b.IsSequence()){
+		return YamlError("Child node is not an ordered dictionary.");
+	}
+
 	// Vector containing all the indexes of b which are present in a.
 	std::vector<int> checked;
 	std::optional<std::size_t> index;
@@ -184,19 +189,17 @@ YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
 		if (!singleMap(map_b[i])){
 			return YamlError("Ordered dictionary should only contain single item map");
 		}
-		for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++){
-			std::string key = iterator->first.as<std::string>();
-			index = orderedDictFind(map_a, key);
-			if (index && !Contains(checked, index.value())) {
-				if (!singleMap(map_a[index.value()])) {
-					return YamlError("Ordered dictionary should only contain single item map");
-				}
-				mergeYamlMaps(map_a[index.value()], map_b[i]);
-				checked.push_back(index.value());
-				found = true;
-				break;
+		std::string key = map_b[i].begin()->first.as<std::string>();
+		index = orderedDictFind(map_a, key);
+		if (index && !Contains(checked, index.value())) {
+			if (!singleMap(map_a[index.value()])) {
+				return YamlError("Ordered dictionary should only contain single item map");
 			}
+			mergeYamlMaps(map_a[index.value()], map_b[i]);
+			checked.push_back(index.value());
+			found = true;
 		}
+		
 		// If element in b is not present in a, push the new element to a.
 		if (!found){
 				map_a.push_back(map_b[i]);
@@ -208,11 +211,8 @@ YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
 
 // Merge Yaml Nodes.
 YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
-	if (!map_a.IsMap() && map_a.Tag() != "!ordered_dict" && !map_a.IsNull()) {
-		return YamlError{"tried to merge into a YAML node that is neither a map nor an ordered dictionary"};
-	}
-	else if (!map_b.IsMap() && map_b.Tag() != "!ordered_dict" && !map_b.IsNull()) {
-		return YamlError{"tried to merge from a YAML node that is neither a map nor an ordered dictionary"};
+	if (map_a.IsMap()){
+		mergeYamlMaps(map_a, map_b);
 	}
 	else if (map_a.IsNull() && !map_b.IsNull()){
 		map_a = map_b;
@@ -220,15 +220,11 @@ YamlResult<void> mergeYamlNodes(YAML::Node & map_a, YAML::Node map_b) {
 	else if (map_b.IsNull() && !map_a.IsNull()) {
 		return estd::in_place_valid;
 	} 
-	else if (map_a.IsMap()){
-		mergeYamlMaps(map_a, map_b);
-	}
 	else if (map_a.Tag() == "!ordered_dict") {
 		mergeYamlOrderedDict(map_a, map_b);
 	}
-
+	
 	return estd::in_place_valid;
-
 }
 
 
