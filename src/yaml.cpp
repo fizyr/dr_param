@@ -151,42 +151,51 @@ bool Contains(const std::vector<int> &list, int x){
 	return std::find(list.begin(), list.end(), x) != list.end();
 }
 
+// Check whether item is a single item map.
+bool singleMap(YAML::Node yaml_node){
+	if (!yaml_node.IsMap() && yaml_node.size() > 1){
+		return false;
+	}
+	return true;
+}
 // Utility function to check whether key in map_b is present in map_a.
-bool orderedDictFind(YAML::Node map_a, std::string const & key){
-	if (map_a[key]){
-			return true;
-		} 
-	return false;
+std::optional<std::size_t> orderedDictFind(YAML::Node map_a, std::string const & key){
+	for (std::size_t j = 0; j < map_a.size(); j++){
+			if (map_a[j][key]){
+					return j;
+				}
+			
+	}
+	
+	return std::nullopt;
 }
 
-// Merge Yaml ordered dictionary.
+// Merge ordered dictionaries.
 YamlResult<void> mergeYamlOrderedDict(YAML::Node & map_a, YAML::Node map_b){
 	// Vector containing all the indexes of b which are present in a.
 	std::vector<int> checked;
+	std::optional<std::size_t> index;
+	bool single_map = true;
 	// Boolean to determine whether the element in b is present in a or not.
 	bool found = false;
 	for (std::size_t i = 0; i < map_b.size(); i++) {
 		found = false;
 		// Check whether the element in b is a single key-value pair.
-		
-		if (!map_b[i].IsMap() || map_b[i].size() > 1){
+		if (!singleMap(map_b[i])){
 			return YamlError("Ordered dictionary should only contain single item map");
 		}
-		for (std::size_t j = 0; j < map_a.size(); j++){
-			// Check whether the element in a is a single key-value pair.
-			if (!map_a[j].IsMap() || map_a[j].size() > 1){
-				return YamlError("Ordered dictionary should only contain single item map");
-			}
-			for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++) {
-				std::string key = iterator->first.as<std::string>();
-				if (orderedDictFind(map_a[j], key) && !Contains(checked, j)){
-					mergeYamlMaps(map_a[j], map_b[i]);
-					checked.push_back(j);
-					found = true;
-					break;
+		for (YAML::const_iterator iterator = map_b[i].begin(); iterator != map_b[i].end(); iterator++){
+			std::string key = iterator->first.as<std::string>();
+			index = orderedDictFind(map_a, key);
+			if (index && !Contains(checked, index.value())) {
+				if (!singleMap(map_a[index.value()])) {
+					return YamlError("Ordered dictionary should only contain single item map");
 				}
+				mergeYamlMaps(map_a[index.value()], map_b[i]);
+				checked.push_back(index.value());
+				found = true;
+				break;
 			}
-			
 		}
 		// If element in b is not present in a, push the new element to a.
 		if (!found){
