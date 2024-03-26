@@ -1,8 +1,4 @@
 find_package(Catch2 REQUIRED)
-include_directories(${Catch2_INCLUDE_DIRS})
-
-add_library(${PROJECT_NAME}_test_main EXCLUDE_FROM_ALL main.cpp)
-target_link_libraries(${PROJECT_NAME}_test_main ${PROJECT_NAME})
 
 define_property(GLOBAL PROPERTY CHECK_TARGET BRIEF_DOCS "." FULL_DOCS ".")
 set_property(GLOBAL PROPERTY CHECK_TARGET "check")
@@ -13,7 +9,7 @@ endif()
 
 function(declare_test name)
 	add_executable(${name} EXCLUDE_FROM_ALL ${ARGN})
-	target_link_libraries(${name} PRIVATE ${PROJECT_NAME}_test_main)
+	target_link_libraries(${name} PRIVATE ${PROJECT_NAME} Catch2::Catch2WithMain)
 	add_custom_target(check_${name} COMMAND ${name})
 	add_dependencies(tests ${name})
 

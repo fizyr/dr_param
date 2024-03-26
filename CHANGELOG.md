@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## master
 
+### Changed
+- Update usage of Catch2 for version 3.x.
+
 ## 2.0.0 - 2021-01-05
 ### Changed
 - Export boost and dr_util as transitive dependency to facilitate static linking.
