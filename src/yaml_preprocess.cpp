@@ -43,14 +43,15 @@ namespace {
 		boost::filesystem::path path = expandVariables(node.as<std::string>(), variables);
 		if (path.empty()) return estd::error{std::errc::invalid_argument, "tried to include empty path"};
 		if (path.is_relative()) path = path_info.dir / path;
-		path.normalize();
+		// TOOD: should we just use lexically_normal() instead?
+		auto normal_path = boost::filesystem::canonical(path);
 
 		// Parse node, process tags and overwrite original.
 		node.SetTag("");
-		node = readYamlFile(path.native()).value();
+		node = readYamlFile(normal_path.native()).value();
 
 		// Queue node for reprocessing.
-		work.push_back(Work{PathInfo{path.parent_path(), path}, {node}});
+		work.push_back(Work{PathInfo{normal_path.parent_path(), normal_path}, {node}});
 
 		return estd::in_place_valid;
 	}
