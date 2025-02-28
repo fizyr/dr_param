@@ -43,8 +43,7 @@ namespace {
 		boost::filesystem::path path = expandVariables(node.as<std::string>(), variables);
 		if (path.empty()) return estd::error{std::errc::invalid_argument, "tried to include empty path"};
 		if (path.is_relative()) path = path_info.dir / path;
-		// TOOD: should we just use lexically_normal() instead?
-		auto normal_path = boost::filesystem::canonical(path);
+		auto normal_path = path.lexically_normal();
 
 		// Parse node, process tags and overwrite original.
 		node.SetTag("");
