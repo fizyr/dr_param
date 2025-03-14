@@ -1,2 +1,2 @@
-# Unreleased
-[change][major] Replace deprecated `boost::filesystem::path::normalize` with less powerfull `boost::filesystem::path::lexically_normal`.
+# 3.0.0
+- [change][major] Replace deprecated `boost::filesystem::path::normalize` with less powerfull `boost::filesystem::path::lexically_normal`.
